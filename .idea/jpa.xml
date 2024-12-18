@@ -2,7 +2,7 @@
 <project version="4">
   <component name="JpaBuddyIdeaProjectConfig">
     <option name="defaultUnitInitialized" value="true" />
-    <option name="reLastEntityCreationPackage" value="DebriefRepository/src/main/java/org/example/debriefrepository/Entities" />
+    <option name="reLastEntityCreationPackage" value="DebriefRepository/src/main/java/org/example/debriefrepository/entity" />
     <option name="renamerInitialized" value="true" />
     <option name="reverseEngineeringLastDbConnectionId" value="2a4dede0-bf20-4094-8cfb-d84d8cd227f3__debriefs_project_debrief_mgmt" />
   </component>
