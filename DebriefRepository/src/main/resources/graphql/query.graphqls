@@ -1,0 +1,15 @@
+
+input UserInput{
+    id: ID!
+}
+
+input DebriefInput{
+    content: String!
+    date: Date!
+    user: UserInput!
+}
+
+type Query{
+    debriefById(id: ID!): Debrief
+    alldebriefs: [Debrief!]
+}
