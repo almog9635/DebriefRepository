@@ -1,0 +1,6 @@
+type Debrief{
+    id: ID!
+    content: String!
+    date: Date!
+    user: User!
+}

@@ -1,0 +1,5 @@
+type Mutation {
+    createDebrief(input: DebriefInput!): Debrief
+    updateObject(id: ID!, input: DebriefInput!): Debrief
+    deleteObject(id: ID!): Boolean
+}
