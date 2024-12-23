@@ -1,6 +1,10 @@
+input RoleInput{
+    roleName: String!
+}
 
 input UserInput{
     id: ID!
+    roles: [RoleInput!]!
 }
 
 input DebriefInput{
@@ -11,5 +15,6 @@ input DebriefInput{
 
 type Query{
     debriefById(id: ID!): Debrief
-    alldebriefs: [Debrief!]
+    alldebriefs : [Debrief!]
+    getUser(id: ID!): User
 }
