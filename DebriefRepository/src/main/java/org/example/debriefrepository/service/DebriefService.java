@@ -36,8 +36,12 @@ public class DebriefService {
                 .orElse(null);
     }
 
-    public void deleteDebriefById(Long id) {
+    public Boolean deleteDebriefById(Long id) {
+        if(getDebriefById(id) == null) {
+            return false;
+        }
         debriefRepository.deleteById(id);
+        return true;
     }
 
     public Debrief updateDebriefById(Long id, Debrief debrief) {
