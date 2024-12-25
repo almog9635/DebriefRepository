@@ -45,4 +45,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<Role> roles;
 
+    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    private String password;
 }

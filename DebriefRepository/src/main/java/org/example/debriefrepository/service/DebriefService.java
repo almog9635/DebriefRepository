@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Debrief;
 import org.example.debriefrepository.entity.User;
 import org.example.debriefrepository.repository.DebriefRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DebriefService {
 
+    @Autowired
     private final DebriefRepository debriefRepository;
 
     public Debrief createDebrief(Debrief debrief) {
@@ -35,8 +36,12 @@ public class DebriefService {
                 .orElse(null);
     }
 
-    public void deleteDebriefById(Long id) {
+    public Boolean deleteDebriefById(Long id) {
+        if(getDebriefById(id) == null) {
+            return false;
+        }
         debriefRepository.deleteById(id);
+        return true;
     }
 
     public Debrief updateDebriefById(Long id, Debrief debrief) {
