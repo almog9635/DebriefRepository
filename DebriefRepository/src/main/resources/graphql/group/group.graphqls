@@ -1,0 +1,10 @@
+type Group{
+    id: ID!
+    name: String!
+    users: [User!]!
+    debriefs: [Debrief!]!
+}
+
+input GroupInput{
+    name: String!
+}

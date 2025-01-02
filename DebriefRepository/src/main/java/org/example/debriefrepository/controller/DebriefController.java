@@ -2,6 +2,7 @@ package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Debrief;
+import org.example.debriefrepository.input.DebriefInput;
 import org.example.debriefrepository.service.DebriefService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -20,27 +21,27 @@ public class DebriefController {
     private final DebriefService debriefService;
 
     @QueryMapping
-    public Debrief debriefById(@Argument Long id) {
+    public Debrief debriefs(@Argument Long id) {
         return debriefService.getDebriefById(id);
     }
 
     @QueryMapping
-    public List<Debrief> getAll() {
+    public List<Debrief> getAllDebriefs() {
         return debriefService.getAllDebriefs();
     }
 
     @MutationMapping
-    public Debrief create(@Argument Debrief debrief) {
-        return debriefService.createDebrief(debrief);
+    public Debrief addDebrief(@Argument DebriefInput debrief) {
+        return debriefService.createDebrief(new Debrief());
     }
 
     @MutationMapping
-    public Debrief update(@Argument Debrief debrief) {
-        return debriefService.updateDebriefById(debrief.getId(), debrief);
+    public Debrief updateDebrief(@Argument Long id, @Argument DebriefInput debrief) {
+        return debriefService.updateDebriefById(id, new Debrief());
     }
 
     @MutationMapping
-    public Boolean delete(@Argument Long id) {
+    public Boolean deleteDebrief(@Argument Long id) {
         return debriefService.deleteDebriefById(id);
     }
 }

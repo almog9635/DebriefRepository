@@ -2,6 +2,7 @@ package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.User;
+import org.example.debriefrepository.input.UserInput;
 import org.example.debriefrepository.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @QueryMapping
-    public User userById(@Argument Long id) {
+    public User users(@Argument Long id) {
         return userService.getUserById(id);
     }
 
@@ -29,17 +30,17 @@ public class UserController {
     }
 
     @MutationMapping
-    public User create(@Argument User user) {
+    public User addUser(@Argument UserInput user) {
         return userService.createUser(user);
     }
 
     @MutationMapping
-    public User update(@Argument User user) {
-        return userService.updateById(user.getId(), user);
+    public User updateUser(@Argument Long id, @Argument UserInput user) {
+        return userService.updateById(id, user);
     }
 
     @MutationMapping
-    public Boolean delete(@Argument Long id) {
+    public Boolean deleteUser(@Argument Long id) {
         return userService.deleteById(id);
     }
 }

@@ -1,0 +1,18 @@
+type Mission{
+    id: ID!
+    content: String!
+    startDate: Date!
+    deadline: Date!
+    user: User!
+    debrief: Debrief!
+    lesson: Lesson
+}
+
+input MissionInput{
+    content: String!
+    date: Date!
+    deadline: Date!
+    user: UserInput!
+    debrief: DebriefInput!
+    lesson: LessonInput
+}

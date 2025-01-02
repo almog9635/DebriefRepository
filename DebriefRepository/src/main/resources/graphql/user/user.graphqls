@@ -4,5 +4,18 @@ type User{
     firstName: String!
     lastName: String!
     password: String!
+    serviceType: String!
     roles: [Role!]!
+    group: Group!
+    missions: [Mission!]
+}
+
+input UserInput{
+    firstName: String!
+    lastName: String!
+    password: String!
+    roles: [RoleInput!]!
+    serviceType: String!
+    group: GroupInput!
+    missions: [MissionInput!]
 }

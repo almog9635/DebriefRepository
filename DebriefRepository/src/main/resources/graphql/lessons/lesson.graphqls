@@ -1,0 +1,10 @@
+type Lesson{
+    id: ID!
+    content: String!
+    debrief: Debrief!
+}
+
+input LessonInput{
+    content: String!
+    debrief: DebriefInput!
+}

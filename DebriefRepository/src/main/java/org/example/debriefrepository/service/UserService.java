@@ -1,12 +1,17 @@
 package org.example.debriefrepository.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.debriefrepository.entity.Group;
+import org.example.debriefrepository.entity.Mission;
+import org.example.debriefrepository.entity.Role;
 import org.example.debriefrepository.entity.User;
-import org.example.debriefrepository.repository.UserRepository;
+import org.example.debriefrepository.input.UserInput;
+import org.example.debriefrepository.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,7 +20,33 @@ public class UserService {
     @Autowired
     private final UserRepository userRepository;
 
-    public User createUser(User user) {
+    @Autowired
+    private final GroupRepository groupRepository;
+
+    @Autowired
+    private final RoleRepository roleRepository;
+
+    @Autowired
+    private final DebriefRepository debriefRepository;
+
+    @Autowired
+    private final LessonRepository lessonRepository;
+
+    @Autowired
+    private final MissionRepository missionRepository;
+
+    public User createUser(UserInput userInput) {
+        User user = new User();
+        user.setFirstName(userInput.firstName());
+        user.setLastName(userInput.lastName());
+        user.setPassword(userInput.password());
+        user.setServiceType(userInput.serviceType());
+
+        // Map RoleInput to Role entities
+
+        user.setRoles(extractRoles(userInput));
+
+        user.setGroup(findGroupByName(userInput.group().groupName()));
         userRepository.save(user);
         return user;
     }
@@ -35,18 +66,31 @@ public class UserService {
         return true;
     }
 
-    public User updateById(Long id, User user) {
+    public User updateById(Long id, UserInput userInput) {
         User existingUser = getUserById(id);
         if (existingUser != null) {
-            existingUser.setMissions(user.getMissions());
-            existingUser.setDebriefs(user.getDebriefs());
-            existingUser.setGroup(user.getGroup());
-            existingUser.setPassword(user.getPassword());
-            existingUser.setServiceType(user.getServiceType());
-            existingUser.setFirstName(user.getFirstName());
-            existingUser.setLastName(user.getLastName());
+            existingUser.setRoles(extractRoles(userInput));
+            //map the missions
+            //List<Mission> missions = userInput.missions();
+            //existingUser.setMissions(userInput.missions());
+
+            existingUser.setGroup(findGroupByName(userInput.group().groupName()));
+            existingUser.setPassword(userInput.password());
+            existingUser.setServiceType(userInput.serviceType());
+            existingUser.setFirstName(userInput.firstName());
+            existingUser.setLastName(userInput.lastName());
             userRepository.save(existingUser);
         }
         return existingUser;
+    }
+
+    private Group findGroupByName(String name) {
+        return groupRepository.findByName(name);
+    }
+
+    private List<Role> extractRoles(UserInput userInput) {
+        return userInput.roles().stream()
+                .map(roleInput -> roleRepository.findByRoleName(roleInput.roleName()))
+                .collect(Collectors.toList());
     }
 }

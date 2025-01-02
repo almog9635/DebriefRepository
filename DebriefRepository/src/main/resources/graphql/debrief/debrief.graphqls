@@ -3,4 +3,12 @@ type Debrief{
     content: String!
     date: Date!
     user: User!
+    group: Group!
+}
+
+input DebriefInput{
+    content: String!
+    date: Date!
+    user: UserInput!
+    group: GroupInput!
 }

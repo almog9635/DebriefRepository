@@ -1,25 +1,7 @@
-input RoleInput{
-    roleName: String!
-}
-
-input UserInput{
-    id: ID!
-    firstName: String!
-    lastName: String!
-    password: String!
-    roles: [RoleInput!]!
-}
-
-input DebriefInput{
-    content: String!
-    date: Date!
-    user: UserInput!
-}
-
 type Query{
     debriefs(id: ID!): Debrief!
     getAllDebriefs : [Debrief!]!
     getAllUsers: [User!]!
     users(id: ID!): User!
-    roles(id: ID!):Role!
+
 }
