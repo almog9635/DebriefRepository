@@ -30,12 +30,12 @@ public class UserController {
     }
 
     @MutationMapping
-    public User addUser(@Argument UserInput user) {
+    public User addUser(@Argument("input") UserInput user) {
         return userService.createUser(user);
     }
 
     @MutationMapping
-    public User updateUser(@Argument Long id, @Argument UserInput user) {
+    public User updateUser(@Argument("id") Long id, @Argument("input") UserInput user) {
         return userService.updateById(id, user);
     }
 
