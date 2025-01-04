@@ -3,5 +3,7 @@ type Query{
     getAllDebriefs : [Debrief!]!
     getAllUsers: [User!]!
     users(id: ID!): User!
+    roles(id: ID!): Role!
+    getAllRoles: [Role!]!
 
 }

@@ -2,14 +2,13 @@ package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Debrief;
-import org.example.debriefrepository.input.DebriefInput;
+import org.example.debriefrepository.types.input.DebriefInput;
 import org.example.debriefrepository.service.DebriefService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 

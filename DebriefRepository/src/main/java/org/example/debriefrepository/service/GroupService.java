@@ -7,4 +7,5 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GroupService {
 
+    /* todo: to add group implementation so a user can be added */
 }
