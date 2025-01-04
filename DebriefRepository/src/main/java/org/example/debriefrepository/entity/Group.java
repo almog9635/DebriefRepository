@@ -18,7 +18,7 @@ public class Group {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "name", nullable = false, unique = true, length = Integer.MAX_VALUE)
     private String name;
 
     @OneToMany(mappedBy = "group")

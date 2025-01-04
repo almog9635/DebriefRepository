@@ -17,5 +17,15 @@ input UserInput{
     roles: [RoleInput!]!
     serviceType: String!
     group: GroupInput!
+}
+
+input UserUpdateInput{
+    id: ID!
+    firstName: String
+    lastName: String
+    password: String
+    roles: [RoleInput!]
+    serviceType: String
+    group: GroupInput
     missions: [MissionInput!]
 }

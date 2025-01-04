@@ -2,8 +2,9 @@ package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.User;
-import org.example.debriefrepository.input.UserInput;
+import org.example.debriefrepository.types.input.UserInput;
 import org.example.debriefrepository.service.UserService;
+import org.example.debriefrepository.types.update.UserUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -35,8 +36,8 @@ public class UserController {
     }
 
     @MutationMapping
-    public User updateUser(@Argument("id") Long id, @Argument("input") UserInput user) {
-        return userService.updateById(id, user);
+    public User updateUser(@Argument("input") UserUpdate user) {
+        return userService.updateById(user);
     }
 
     @MutationMapping

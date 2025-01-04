@@ -12,7 +12,17 @@ input MissionInput{
     content: String!
     date: Date!
     deadline: Date!
-    user: UserInput!
+    User: ID!
+    debrief: DebriefInput!
+    lesson: LessonInput
+}
+
+input MissionUpdate{
+    id: ID!
+    content: String
+    date: Date
+    deadline: Date
+    User: ID!
     debrief: DebriefInput!
     lesson: LessonInput
 }

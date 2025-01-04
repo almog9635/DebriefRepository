@@ -3,10 +3,10 @@ package org.example.debriefrepository.service;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Group;
 import org.example.debriefrepository.entity.Mission;
-import org.example.debriefrepository.entity.Role;
 import org.example.debriefrepository.entity.User;
-import org.example.debriefrepository.input.UserInput;
 import org.example.debriefrepository.repository.*;
+import org.example.debriefrepository.types.input.UserInput;
+import org.example.debriefrepository.types.update.UserUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,19 +36,7 @@ public class UserService {
     private final MissionRepository missionRepository;
 
     public User createUser(UserInput userInput) {
-        User user = new User();
-        user.setFirstName(userInput.firstName());
-        user.setLastName(userInput.lastName());
-        user.setPassword(userInput.password());
-        user.setServiceType(userInput.serviceType());
-
-        // Map RoleInput to Role entities
-
-        user.setRoles(extractRoles(userInput));
-
-        user.setGroup(findGroupByName(userInput.group().groupName()));
-        userRepository.save(user);
-        return user;
+        return userRepository.save(mapToUser(userInput));
     }
 
     public List<User> getAllUsers() {
@@ -66,31 +54,61 @@ public class UserService {
         return true;
     }
 
-    public User updateById(Long id, UserInput userInput) {
-        User existingUser = getUserById(id);
+    /* todo: missions update */
+    public User updateById(UserUpdate userUpdate) {
+        User existingUser = getUserById(userUpdate.id());
         if (existingUser != null) {
-            existingUser.setRoles(extractRoles(userInput));
-            //map the missions
-            //List<Mission> missions = userInput.missions();
-            //existingUser.setMissions(userInput.missions());
-
-            existingUser.setGroup(findGroupByName(userInput.group().groupName()));
-            existingUser.setPassword(userInput.password());
-            existingUser.setServiceType(userInput.serviceType());
-            existingUser.setFirstName(userInput.firstName());
-            existingUser.setLastName(userInput.lastName());
+            User user = mapToUser(userUpdate);
+            existingUser.setRoles((user.getRoles()));
+            existingUser.setGroup(user.getGroup());
+            existingUser.setPassword(user.getPassword());
+            existingUser.setServiceType(user.getServiceType());
+            existingUser.setFirstName(user.getFirstName());
+            existingUser.setLastName(user.getLastName());
+            if(user.getMissions() != null)
+                existingUser.setMissions(user.getMissions());
             userRepository.save(existingUser);
         }
         return existingUser;
     }
 
-    private Group findGroupByName(String name) {
-        return groupRepository.findByName(name);
+    private User mapToUser(UserInput input) {
+        User user = new User();
+        user.setFirstName(input.firstName());
+        user.setLastName(input.lastName());
+        user.setPassword(input.password());
+        user.setServiceType(input.serviceType());
+        user.setRoles(input.roles().stream()
+                .map(roleInput -> roleRepository.findByRoleName(roleInput.roleName()))
+                .toList());
+        Group group = groupRepository.findByName(input.group().name());
+        user.setGroup(group);
+        return user;
     }
 
-    private List<Role> extractRoles(UserInput userInput) {
-        return userInput.roles().stream()
+    private User mapToUser(UserUpdate update) {
+        User user = new User();
+        user.setFirstName(update.firstName());
+        user.setLastName(update.lastName());
+        user.setPassword(update.password());
+        user.setServiceType(update.serviceType());
+        user.setRoles(update.roles().stream()
                 .map(roleInput -> roleRepository.findByRoleName(roleInput.roleName()))
-                .collect(Collectors.toList());
+                .toList());
+        Group group = groupRepository.findByName(update.group().name());
+        user.setGroup(group);
+        if (update.missions() != null) {
+            user.setMissions(update.missions().stream()
+                    .map(missionInput -> {
+                        Mission mission = new Mission();
+                        mission.setContent(missionInput.content());
+                        mission.setStartDate(missionInput.startDate());
+                        mission.setDeadline(missionInput.deadline());
+                        mission.setUser(getUserById(missionInput.userId()));
+                        return mission;
+                    })
+                    .collect(Collectors.toSet()));
+        }
+        return user;
     }
 }
