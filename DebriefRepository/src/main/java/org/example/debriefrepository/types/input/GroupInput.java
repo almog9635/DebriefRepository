@@ -3,5 +3,7 @@ package org.example.debriefrepository.types.input;
 import org.jetbrains.annotations.NotNull;
 
 public record GroupInput(
-                         @NotNull String name) {
+        @NotNull String name)
+        //@NotNull Long commanderId)
+{
 }

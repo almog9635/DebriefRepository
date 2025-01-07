@@ -30,6 +30,11 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @QueryMapping
+    public List<User> getAllUsersByGroupId(@Argument("id") Long groupId) {
+        return userService.getAllUsersGroup(groupId);
+    }
+
     @MutationMapping
     public User addUser(@Argument("input") UserInput user) {
         return userService.createUser(user);

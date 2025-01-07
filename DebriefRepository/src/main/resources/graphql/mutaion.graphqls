@@ -6,4 +6,8 @@ type Mutation {
     addUser(input: UserInput!): User
     updateUser(input: UserUpdateInput!): User
     deleteUser(id: ID!): Boolean
+
+    addGroup(input: GroupCreate!): Group
+    updateGroup(input: GroupUpdate!): Group
+    deleteGroup(id: ID!): Boolean
 }

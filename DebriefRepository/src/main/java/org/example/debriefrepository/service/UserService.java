@@ -86,6 +86,12 @@ public class UserService {
         return user;
     }
 
+    public List<User> getAllUsersGroup(Long groupId) {
+        return userRepository.findAll().stream()
+                .filter(user-> user.getGroup().getId().equals(groupId))
+                .toList();
+    }
+
     private User mapToUser(UserUpdate update) {
         User user = new User();
         user.setFirstName(update.firstName());

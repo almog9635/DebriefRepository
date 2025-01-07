@@ -4,5 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record GroupUpdate(
         @NotNull Long id,
-        @NotNull String name) {
+        @NotNull String name)
+        //@NotNull Long commander)
+        {
 }

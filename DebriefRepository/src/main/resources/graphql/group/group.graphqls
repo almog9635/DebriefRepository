@@ -1,10 +1,23 @@
 type Group{
     id: ID!
     name: String!
+    #commander: User!
     users: [User!]!
     debriefs: [Debrief!]!
 }
 
 input GroupInput{
     name: String!
+    #commander: ID!
+}
+
+input GroupCreate{
+    name: String!
+    #commander: ID!
+}
+
+input GroupUpdate{
+    id: ID!
+    name: String
+    #commander: ID
 }

@@ -25,4 +25,9 @@ public class RoleController {
     public Role roles(Long id) {
         return roleService.findById(id);
     }
+
+    @QueryMapping
+    public Role roleByName(String name) {
+        return roleService.findByName(name);
+    }
 }
