@@ -1,31 +1,37 @@
-
 type User{
     id: ID!
     firstName: String!
     lastName: String!
     password: String!
-    serviceType: String!
+    serviceType: ServiceTypeEnum!
     roles: [Role!]!
     group: Group!
+    rank: RankEnum!
+    debriefs: [Debrief!]
     missions: [Mission!]
 }
 
 input UserInput{
-    firstName: String!
-    lastName: String!
-    password: String!
-    roles: [RoleInput!]!
-    serviceType: String!
-    group: GroupInput!
-}
-
-input UserUpdateInput{
-    id: ID!
+    id: ID
     firstName: String
     lastName: String
     password: String
     roles: [RoleInput!]
-    serviceType: String
+    serviceType: ServiceTypeEnum
+    rank : RankEnum
     group: GroupInput
-    missions: [MissionInput!]
+    debriefs: DebriefInput
+    missions: MissionInput
+
+}
+
+input UserUpdate{
+    firstName: String!
+    lastName: String!
+    password: String!
+    roles: [RoleInput!]!
+    serviceType: ServiceTypeEnum!
+    rank: RankEnum!
+    group: String!
+    missions: [ID!]
 }

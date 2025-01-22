@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -13,17 +16,13 @@ import java.util.Set;
 @Entity
 @Table(name = "debrief", schema = "debrief_mgmt")
 public class Debrief {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "debrief_id_gen")
-    @SequenceGenerator(name = "debrief_id_gen", sequenceName = "debrief_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
 
-    @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
-    private String content;
+    @Id
+    @Column(name = "id", nullable = false, length = Integer.MAX_VALUE)
+    private String id;
 
     @Column(name = "date", nullable = false)
-    private LocalDate date;
+    private ZonedDateTime date;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -33,10 +32,13 @@ public class Debrief {
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
-    @OneToMany(mappedBy = "debrief")
-    private Set<Lesson> lessons = new LinkedHashSet<>();
+    @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
+    private String content;
 
     @OneToMany(mappedBy = "debrief")
-    private Set<Mission> missions = new LinkedHashSet<>();
+    private List<Lesson> lessons = new ArrayList<>();
+
+    @OneToMany(mappedBy = "debrief")
+    private List<Mission> missions = new ArrayList<>();
 
 }

@@ -1,27 +1,18 @@
 package org.example.debriefrepository.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "users", schema = "debrief_mgmt")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
-    @SequenceGenerator(name = "users_id_gen", sequenceName = "users_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
-
-    @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
-    private String firstName;
+@Table(name = "\"user\"", schema = "debrief_mgmt")
+public class User extends BaseEntity {
 
     @Column(name = "last_name", nullable = false, length = Integer.MAX_VALUE)
     private String lastName;
@@ -29,24 +20,31 @@ public class User {
     @Column(name = "service_type", nullable = false, length = Integer.MAX_VALUE)
     private String serviceType;
 
+    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    private String password;
+
+    @Column(name = "rank", nullable = false, length = Integer.MAX_VALUE)
+    private String rank;
+
+    @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
+    private String firstName;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Debrief> debriefs = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "commander")
+    private Set<Group> groups = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     private Set<Mission> missions = new LinkedHashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"}))
-    private List<Role> roles;
+    private Set<Role> roles;
 
-    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
-    private String password;
 }

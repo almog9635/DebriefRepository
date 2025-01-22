@@ -4,11 +4,25 @@ type Debrief{
     date: Date!
     user: User!
     group: Group!
+    lessons: [Lesson!]
+    missions: [Mission!]!
 }
 
 input DebriefInput{
+    id : ID
+    content: String
+    date: Date
+    user: ID
+    group: GroupInput
+    lesson: LessonInput
+    mission: MissionInput
+}
+
+input DebriefUpdate{
     content: String!
     date: Date!
-    user: UserInput!
-    group: GroupInput!
+    user: ID!
+    group: String!
+    lessons: [ID!]!
+    missions: [ID!]!
 }

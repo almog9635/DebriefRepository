@@ -9,20 +9,20 @@ type Mission{
 }
 
 input MissionInput{
-    content: String!
-    date: Date!
-    deadline: Date!
-    User: ID!
-    debrief: DebriefInput!
+    id: ID
+    content: String
+    startDate: Date
+    deadline: Date
+    user: UserInput
+    debrief: DebriefInput
     lesson: LessonInput
 }
 
 input MissionUpdate{
-    id: ID!
-    content: String
-    date: Date
-    deadline: Date
-    User: ID!
-    debrief: DebriefInput!
-    lesson: LessonInput
+    content: String!
+    startDate: Date!
+    deadline: Date!
+    user: ID!
+    debrief: ID!
+    lesson: ID
 }

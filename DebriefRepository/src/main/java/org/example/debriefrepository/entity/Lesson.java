@@ -6,17 +6,17 @@ import lombok.Setter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "lesson", schema = "debrief_mgmt")
 public class Lesson {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "lesson_id_gen")
-    @SequenceGenerator(name = "lesson_id_gen", sequenceName = "lesson_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @Column(name = "id", nullable = false, length = Integer.MAX_VALUE)
+    private String id = UUID.randomUUID().toString();
 
     @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
     private String content;

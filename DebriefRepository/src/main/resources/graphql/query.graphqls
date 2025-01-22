@@ -1,16 +1,13 @@
 type Query{
-    debriefs(id: ID!): Debrief!
-    getAllDebriefs : [Debrief!]!
+    debriefs(input: DebriefInput): [Debrief!]
+    getAllDebriefs: [Debrief!]!
 
     getAllUsers: [User!]!
-    users(id: ID!): User!
-    getAllUsersByGroupId(id: ID!): [User!]
+    users(input: UserInput): [User!]
 
-    roles(id: ID!): Role!
-    roleByName(name: String!): Role!
+    roles(input: RoleInput!): [Role!]
     getAllRoles: [Role!]!
 
-    groups(id: ID!):Group!
+    groups(input: GroupInput!): Group!
     getAllGroups: [Group!]!
-    groupByName: Group!
 }
