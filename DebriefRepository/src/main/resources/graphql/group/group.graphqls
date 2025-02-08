@@ -1,0 +1,21 @@
+type Group{
+    id: ID!
+    name: String!
+    commander: User
+    users: [User!]!
+    debriefs: [Debrief!]!
+}
+
+input GroupInput{
+    id : ID
+    name: String
+    commander: UserInput
+    user: UserInput
+    debrief: DebriefInput
+}
+
+input GroupUpdate{
+    name: String!
+    commander: ID
+    users: [ID!]
+}

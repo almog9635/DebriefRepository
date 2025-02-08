@@ -1,0 +1,19 @@
+type Lesson{
+    id: ID!
+    content: String!
+    debrief: Debrief!
+    missions: [Mission!]!
+}
+
+input LessonInput{
+    id: ID
+    content: String
+    debrief: DebriefInput
+    missions: [MissionInput!]
+}
+
+input LessonUpdate{
+    content: String!
+    debrief : ID!
+    Mission: [ID!]!
+}

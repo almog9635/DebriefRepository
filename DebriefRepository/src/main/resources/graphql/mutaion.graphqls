@@ -1,10 +1,13 @@
 type Mutation {
-    addDebrief(input: DebriefInput!): Debrief
-    updateDebrief(id: ID!, input: DebriefInput!): Debrief
+    createDebrief(input: DebriefInput!): Debrief!
+    updateDebrief(input: DebriefInput!): Debrief!
     deleteDebrief(id: ID!): Boolean
 
-    addUser(input: UserInput!): User
-    updateUser(id: ID!, input: UserInput!): User
+    createUser(input: UserUpdate!): User!
+    updateUser(input: UserUpdate!): User!
     deleteUser(id: ID!): Boolean
 
+    createGroup(input: GroupUpdate!): Group!
+    updateGroup(input: GroupUpdate!): Group!
+    deleteGroup(id: ID!): Boolean
 }

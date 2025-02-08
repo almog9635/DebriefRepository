@@ -1,3 +1,8 @@
 type Role{
-    roleName: String!
+    id: ID!
+    name: String!
+}
+
+input RoleInput{
+    name: String!
 }

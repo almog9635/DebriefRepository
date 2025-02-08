@@ -1,0 +1,31 @@
+    enum ServiceTypeEnum {
+        HOVA
+        KEVA
+        MILUIM
+        EZRAH
+    }
+
+
+    enum RankEnum {
+        """טוראי"""
+        PRIVATE
+
+        PRIVATE_FIRST_CLASS
+        CORPORAL
+        SERGEANT
+        STAFF_SERGEANT
+        SERGEANT_FIRST_CLASS
+        MASTER_SERGEANT
+        SENIOR_MASTER_SERGEANT
+        ADVANCED_MASTER_SERGEANT
+        CHIEF_WARRANT_OFFICER
+        SECOND_LIEUTENANT
+        LIEUTENANT
+        CAPTAIN
+        MAJOR
+        LIEUTENANT_COLONEL
+        COLONEL
+        BRIGADIER_GENERAL
+        MAJOR_GENERAL
+        CHIEF_OF_STAFF
+    }

@@ -4,27 +4,26 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "\"group\"", schema = "debrief_mgmt")
-public class Group {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_id_gen")
-    @SequenceGenerator(name = "group_id_gen", sequenceName = "group_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
+public class Group extends BaseEntity {
 
     @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
     private String name;
 
-    @OneToMany(mappedBy = "group")
-    private Set<Debrief> debriefs = new LinkedHashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "commander_id")
+    private User commander;
 
     @OneToMany(mappedBy = "group")
-    private Set<User> users = new LinkedHashSet<>();
+    private List<Debrief> debriefs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "group")
+    private List<User> users = new ArrayList<>();
 
 }

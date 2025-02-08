@@ -4,10 +4,13 @@ import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 
 public class DateResolver {
+
     public static final GraphQLScalarType DATE = GraphQLScalarType.newScalar()
             .name("Date")
             .description("Date custom scalar type")
@@ -44,4 +47,37 @@ public class DateResolver {
                 }
             })
             .build();
+
+    public static final GraphQLScalarType ZONED_DATE_TIME = GraphQLScalarType.newScalar()
+            .name("ZonedDateTime")
+            .description("Custom scalar type for ZonedDateTime")
+            .coercing(new Coercing<ZonedDateTime, String>() {
+                private final DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+
+                @Override
+                public String serialize(Object dataFetcherResult) {
+                    if (dataFetcherResult instanceof ZonedDateTime) {
+                        return ((ZonedDateTime) dataFetcherResult).format(formatter);
+                    }
+                    throw new IllegalArgumentException("Invalid type for ZonedDateTime scalar: " + dataFetcherResult);
+                }
+
+                @Override
+                public ZonedDateTime parseValue(Object input) {
+                    if (input instanceof String) {
+                        return ZonedDateTime.parse((String) input, formatter);
+                    }
+                    throw new IllegalArgumentException("Invalid value for ZonedDateTime scalar: " + input);
+                }
+
+                @Override
+                public ZonedDateTime parseLiteral(Object input) {
+                    if (input instanceof String) {
+                        return ZonedDateTime.parse((String) input, formatter);
+                    }
+                    throw new IllegalArgumentException("ZonedDateTime scalar can only parse literals of type String.");
+                }
+            })
+            .build();
+
 }

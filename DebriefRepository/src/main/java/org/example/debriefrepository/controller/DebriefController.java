@@ -3,14 +3,15 @@ package org.example.debriefrepository.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Debrief;
 import org.example.debriefrepository.service.DebriefService;
+import org.example.debriefrepository.types.DebriefInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -20,27 +21,27 @@ public class DebriefController {
     private final DebriefService debriefService;
 
     @QueryMapping
-    public Debrief debriefById(@Argument Long id) {
-        return debriefService.getDebriefById(id);
+    public List<Debrief> debriefs(@Argument("input") Map<String, Object> input) {
+        return debriefService.getDebriefs(input);
     }
 
     @QueryMapping
-    public List<Debrief> getAll() {
+    public List<Debrief> getAllDebriefs() {
         return debriefService.getAllDebriefs();
     }
 
     @MutationMapping
-    public Debrief create(@Argument Debrief debrief) {
+    public Debrief createDebrief(@Argument("input") DebriefInput debrief) {
         return debriefService.createDebrief(debrief);
     }
 
     @MutationMapping
-    public Debrief update(@Argument Debrief debrief) {
-        return debriefService.updateDebriefById(debrief.getId(), debrief);
+    public Debrief updateDebrief(@Argument("input") Map<String, Object> input) {
+        return debriefService.updateDebrief(input);
     }
 
     @MutationMapping
-    public Boolean delete(@Argument Long id) {
+    public Boolean deleteDebrief(@Argument("id") Long id) {
         return debriefService.deleteDebriefById(id);
     }
 }

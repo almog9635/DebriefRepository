@@ -4,19 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "lesson", schema = "debrief_mgmt")
-public class Lesson {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "lesson_id_gen")
-    @SequenceGenerator(name = "lesson_id_gen", sequenceName = "lesson_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
+public class Lesson extends BaseEntity {
 
     @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
     private String content;
@@ -26,6 +21,6 @@ public class Lesson {
     private Debrief debrief;
 
     @OneToMany(mappedBy = "lesson")
-    private Set<Mission> missions = new LinkedHashSet<>();
+    private List<Mission> missions = new ArrayList<>();
 
 }

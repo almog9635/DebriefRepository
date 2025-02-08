@@ -1,26 +1,25 @@
 package org.example.debriefrepository.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "role", schema = "debrief_mgmt")
-public class Role {
-    @Id
-    @SequenceGenerator(name = "role_id_gen", sequenceName = "role_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Short id;
+public class Role extends BaseEntity {
 
-    @Column(name = "role_name", nullable = false, length = Integer.MAX_VALUE)
-    private String roleName;
+    @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
+    private String name;
 
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
-    private Set<User> users = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "role")
+    private List<UserRole> users = new ArrayList<>();
 
 }

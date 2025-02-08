@@ -1,50 +1,47 @@
 package org.example.debriefrepository.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "users", schema = "debrief_mgmt")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
-    @SequenceGenerator(name = "users_id_gen", sequenceName = "users_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
-
-    @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
-    private String firstName;
-
+@Table(name = "\"user\"", schema = "debrief_mgmt")
+public class User extends BaseEntity {
+    
     @Column(name = "last_name", nullable = false, length = Integer.MAX_VALUE)
     private String lastName;
 
     @Column(name = "service_type", nullable = false, length = Integer.MAX_VALUE)
     private String serviceType;
 
+    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    private String password;
+
+    @Column(name = "rank", nullable = false, length = Integer.MAX_VALUE)
+    private String rank;
+
+    @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
+    private String firstName;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
     @OneToMany(mappedBy = "user")
-    private Set<Debrief> debriefs = new LinkedHashSet<>();
+    private List<Debrief> debriefs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "commander")
+    private List<Group> groups = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<Mission> missions = new LinkedHashSet<>();
+    private List<Mission> missions = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<Role> roles;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRole> roles = new ArrayList<>();
 
-    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
-    private String password;
 }
