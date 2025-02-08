@@ -3,5 +3,6 @@ package org.example.debriefrepository.types;
 import org.jetbrains.annotations.NotNull;
 
 public record RoleInput(
-                         @NotNull String name) {
+        String id,
+        @NotNull String name) {
 }

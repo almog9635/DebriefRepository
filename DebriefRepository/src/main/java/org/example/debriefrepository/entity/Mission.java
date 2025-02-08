@@ -5,26 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "mission", schema = "debrief_mgmt")
-public class Mission {
-
-    @Id
-    @Column(name = "id", nullable = false, length = Integer.MAX_VALUE)
-    private String id = UUID.randomUUID().toString();
+public class Mission extends BaseEntity {
 
     @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
     private String content;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    private ZonedDateTime startDate;
 
     @Column(name = "deadline", nullable = false)
-    private LocalDate deadline;
+    private ZonedDateTime deadline;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

@@ -4,16 +4,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "\"user\"", schema = "debrief_mgmt")
 public class User extends BaseEntity {
-
+    
     @Column(name = "last_name", nullable = false, length = Integer.MAX_VALUE)
     private String lastName;
 
@@ -33,18 +32,16 @@ public class User extends BaseEntity {
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
+    @OneToMany(mappedBy = "user")
+    private List<Debrief> debriefs = new ArrayList<>();
+
     @OneToMany(mappedBy = "commander")
-    private Set<Group> groups = new LinkedHashSet<>();
+    private List<Group> groups = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<Mission> missions = new LinkedHashSet<>();
+    private List<Mission> missions = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"}))
-    private Set<Role> roles;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRole> roles = new ArrayList<>();
 
 }

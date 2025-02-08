@@ -3,11 +3,13 @@ package org.example.debriefrepository.types;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 public record MissionInput(
+        String id,
         String content,
-        LocalDate startDate,
-        LocalDate deadline,
+        ZonedDateTime startDate,
+        ZonedDateTime deadline,
         Long debrief,
         Long user,
         Long lessonInput) {

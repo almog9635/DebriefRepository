@@ -1,11 +1,10 @@
 package org.example.debriefrepository.types;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Set;
+import java.util.List;
 
 public record GroupInput(
+        String id,
         String name,
-        Long commander,
-        Set<Long> users) {
+        String commanderId,
+        List<Long> users) {
 }

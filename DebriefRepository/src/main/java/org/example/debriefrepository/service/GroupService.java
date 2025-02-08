@@ -95,13 +95,25 @@ public class GroupService {
     }
 
     public Group create(GroupInput groupInput) {
+
         Group group = new Group();
         group.setName(groupInput.name());
         group.setCommander(null);
-        if(groupInput.commander() != null) {
-            group.setCommander(userRepository.findById(groupInput.commander()).orElse(null));
+        try{
+            if(groupInput.commanderId() != null) {
+                User commander = (userRepository.findById(groupInput.commanderId().toString())
+                        .orElse(null));
+                if(commander == null) {
+                    throw new IllegalArgumentException("The commander id " + groupInput.commanderId() + " is not found");
+                }
+                group.setCommander(commander);
+            }
+            return groupRepository.save(group);
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected error occurred");
         }
-        return groupRepository.save(group);
     }
 
     public Boolean deleteById(Long id) {
@@ -110,12 +122,6 @@ public class GroupService {
             return true;
         }
         return false;
-    }
-
-    /* todo: to map the object to users,
-        also to do it in to the roles in user service */
-    private Set<User> handleUsers(Set<Long> users) {
-        return null;
     }
 
 }

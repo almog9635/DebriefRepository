@@ -1,5 +1,6 @@
 package org.example.debriefrepository.service;
 
+import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Debrief;
 import org.example.debriefrepository.repository.DebriefRepository;
@@ -9,10 +10,12 @@ import org.example.debriefrepository.types.DebriefInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.lang.reflect.Field;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -59,10 +62,10 @@ public class DebriefService {
                     return List.of(debrief);
 
                 case "date":
-                    return debriefRepository.findByDate((LocalDate) value);
+                    return debriefRepository.findByDate((ZonedDateTime) value);
 
                 case "user":
-                    return debriefRepository.findByUserId((Long) value);
+                    return debriefRepository.findByUser_Id((String) value);
 
                 case "group":
                     return handleGroupQuery(value);
@@ -96,52 +99,37 @@ public class DebriefService {
         return true;
     }
 
-    /* todo: understand how to get the lessons and missions */
+    /* todo: understand how to get the lessons and missions
+       and also update the metadata                         */
     public Debrief updateDebrief(Map<String, Object> debriefUpdate) {
         try {
-            Debrief existingDebrief = debriefRepository.findById(id)
+            Debrief existingDebrief = debriefRepository.findById((String)debriefUpdate.get("id"))
                     .orElse(null);
-            if (existingDebrief != null) {
-                for (Map.Entry<String, Object> entry : debriefUpdate.entrySet()) {
-                    String key = entry.getKey();
-                    Object value = entry.getValue();
-                    switch (key) {
-                        case "content":
-                            existingDebrief.setContent((String) value);
-                            break;
+            Arrays.stream(DebriefInput.class.getFields()).forEach(field -> {
+                String fieldName = field.getName();
+                if (debriefUpdate.containsKey(fieldName)) {
+                    field.setAccessible(true);
+                    try {
+                        Object value = debriefUpdate.get(fieldName);
+                        Field dbField = Debrief.class.getDeclaredField(fieldName);
+                        Column annotation = dbField.getAnnotation(Column.class);
+                        boolean isOptional = annotation.nullable();
 
-                        case "date":
-                            existingDebrief.setDate((LocalDate) value);
-                            break;
+                        if (!isOptional && Objects.isNull(value)) {
+                            throw new IllegalArgumentException("The field " + fieldName + " is null or empty");
+                        }
 
-                        case "user":
-                            existingDebrief.setUser(userRepository.findById((Long) value)
-                                    .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + value)));
-                            break;
-
-                        case "lessons":
-                            //existingDebrief.setLessons();
-                            break;
-
-                        case "group":
-                            existingDebrief.setGroup(groupRepository.findByName((String) value));
-                            break;
-
-                        case "missions":
-                            //existingDebrief.setMissions();
-                            break;
-
-                        default:
-                            throw new IllegalArgumentException("Unsupported key: " + key);
+                        field.set(existingDebrief, value);
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-                return existingDebrief;
-            }
-        }catch (Error e) {
+            });
+            return debriefRepository.save(existingDebrief);
+        } catch(Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Unexpected error occurred", e);
         }
-        return null;
     }
 
     private Debrief mapToDebrief(DebriefInput input) {
@@ -171,7 +159,7 @@ public class DebriefService {
         if (groupMap.containsKey("id")) {
             Object groupId = groupMap.get("id");
             if (groupId != null) {
-                return debriefRepository.findByGroupId(Long.parseLong(groupId.toString()));
+                return debriefRepository.findByGroup_Id(groupId.toString());
             }
         }
 

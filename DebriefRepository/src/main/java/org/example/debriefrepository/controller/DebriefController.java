@@ -31,7 +31,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Debrief addDebrief(@Argument("input") DebriefInput debrief) {
+    public Debrief createDebrief(@Argument("input") DebriefInput debrief) {
         return debriefService.createDebrief(debrief);
     }
 

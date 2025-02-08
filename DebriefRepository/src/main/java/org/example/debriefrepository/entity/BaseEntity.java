@@ -1,23 +1,24 @@
 package org.example.debriefrepository.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.debriefrepository.listener.MetadataListener;
 
 import java.util.UUID;
 
+@MappedSuperclass
+@EntityListeners(MetadataListener.class)
 @Getter
 @Setter
 public class BaseEntity {
 
     @Id
-    @Column(name = "id", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "id", nullable = false)
     private String id = UUID.randomUUID().toString();
 
     @Embedded
-    private MetaData metaData;
+    private Metadata metaData;
 
 
 }

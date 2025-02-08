@@ -2,18 +2,22 @@ package org.example.debriefrepository.service;
 
 import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.*;
+import org.example.debriefrepository.entity.Group;
+import org.example.debriefrepository.entity.Role;
+import org.example.debriefrepository.entity.User;
+import org.example.debriefrepository.entity.UserRole;
 import org.example.debriefrepository.repository.*;
 import org.example.debriefrepository.types.UserInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,16 +33,27 @@ public class UserService {
     @Autowired
     private final RoleRepository roleRepository;
 
-    @Autowired
-    private final DebriefRepository debriefRepository;
-
-    @Autowired
-    private final LessonRepository lessonRepository;
-
-    @Autowired
-    private final MissionRepository missionRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public User createUser(UserInput userInput) {
+//        for (Field field : userInput.getClass().getDeclaredFields()) {
+//            field.setAccessible(true);
+//            try {
+//                Field entityField = findField(User.class, field.getName())
+//                        .orElseThrow(() -> new IllegalArgumentException("Field " + field.getName() + " not found"));
+//                entityField.setAccessible(true);
+//                Column annotation = entityField.getAnnotation(Column.class);
+//                boolean isNullable = annotation != null && annotation.nullable();
+//
+//                if (field.get(userInput) == null && !field.getName().equals("id") && !isNullable) {
+//                    throw new IllegalArgumentException("Field '" + field.getName() + "' cannot be null");
+//                }
+//            }
+//            catch (IllegalAccessException e) {
+//                throw new IllegalStateException("Error accessing field: " + field.getName(), e);
+//            }
+//        }
+
         return userRepository.save(mapToUser(userInput));
     }
 
@@ -46,102 +61,121 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public List<User> getUser(Map<String, Object> field) {
-        try {
-            if (field == null || field.isEmpty()) {
-                throw new IllegalArgumentException("The field map is null or empty");
-            }
+    /***
+     *
+     * @param chosenField is the chosen field i want to filter the users by
+     * @return a list of users by the chosen field
+     */
+    public List<User> getUser(Map<String, Object> chosenField) {
+        List<User> users = new ArrayList<>();
 
-            if (field.size() > 1) {
-                throw new IllegalArgumentException("The field map contains more than one field");
-            }
-            Map.Entry<String, Object> entry = field.entrySet().iterator().next();
-            String key = entry.getKey();
+        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
+            String fieldName = entry.getKey();
             Object value = entry.getValue();
 
             if (value == null) {
-                throw new IllegalArgumentException("The value for key " + key + " is null");
+                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
             }
 
-            switch (key) {
-                case "id":
-                    User user = userRepository.findById(Long.parseLong(value.toString()))
-                            .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + value));
-                    return List.of(user);
-
-                case "firstName":
-                    return userRepository.findByFirstName(value.toString());
-
-                case "lastName":
-                    return userRepository.findByLastName(value.toString());
-
-                case "serviceType":
-                    return userRepository.findByServiceType(value.toString());
-
-                case "rank":
-                    return userRepository.findByRank(value.toString());
-
-                case "group":
-                    return handleGroupQuery(value);
-
-                case "debrief":
-                    return handleDebriefQuery(value);
-
-                case "name":
-                    return handleRoleQuery(value);
-
-                case "mission":
-                    return handleMissionQuery(value);
-
-                default:
-                    throw new IllegalArgumentException("Unsupported key: " + key);
+            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
             }
-        } catch (IllegalArgumentException e) {
-            System.err.println("Validation Error: " + e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected error occurred", e);
+
+            Object searchValue = (value instanceof Collection) ? ((Collection<?>) value).iterator().next() : value;
+
+            try {
+                List<User> foundUsers = findUsersByField(fieldName, searchValue);
+                users.addAll(foundUsers);
+            } catch (Exception e) {
+                System.err.println("Error finding users by field '" + fieldName + "' with value '" + searchValue + "': " + e.getMessage());
+                throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
+            }
         }
+
+        return users;
     }
 
+    /***
+     *
+     * @param fieldName the name of the field i am trying to filter
+     * @param value the value of that field
+     * @return the list of the users
+     */
+    private List<User> findUsersByField(String fieldName, Object value) {
+        List<User> users = new ArrayList<>();
 
-    public Boolean deleteById(Long id) {
-        if (userRepository.findById(id) == null)
+        for (Method method : userRepository.getClass().getMethods()) {
+            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
+
+            try {
+                String methodName = buildMethodName(fieldName, value);
+                if (!method.getName().equals(methodName)) continue;
+
+                if(value instanceof  Map)
+                {
+                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue() ;
+                }
+                // Invoke the method dynamically
+                Object result = method.invoke(userRepository, value);
+
+                if (result instanceof Optional<?>) {
+                    ((Optional<?>) result).ifPresent(user -> users.add((User) user));
+                } else if (result instanceof List<?>) {
+                    users.addAll((List<User>) result);
+                } else {
+                    System.err.println("Unexpected return type: " + result.getClass().getName());
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Error invoking method: " + method.getName(), e);
+            }
+        }
+        return users;
+    }
+
+    public Boolean deleteById(String id) {
+        if (userRepository.findById(id).isEmpty())
             return false;
         userRepository.deleteById(id);
         return true;
     }
 
+    /* todo: fix graphql update mutation, */
     public User update(Map<String, Object> userInput) {
-        try {
-            User existingUser = userRepository.findById((Long)userInput.get("id"))
-                    .orElse(null);
-            Arrays.stream(UserInput.class.getFields()).forEach(field -> {
-                String fieldName = field.getName();
-                if (userInput.containsKey(fieldName)) {
-                    field.setAccessible(true);
-                    try {
-                        Object value = userInput.get(fieldName);
-                        Field dbField = User.class.getDeclaredField(fieldName);
-                        Column annotation = dbField.getAnnotation(Column.class);
-                        boolean isOptional = annotation.nullable();
-
-                        if (!isOptional && Objects.isNull(value)) {
-                            throw new IllegalArgumentException("The field " + fieldName + " is null or empty");
-                        }
-
-                        field.set(existingUser, value);
-                    } catch (IllegalAccessException | NoSuchFieldException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
-                return userRepository.save(existingUser);
-        } catch (Error error) {
-            error.printStackTrace();
-            return null;
+        String userId = (String) userInput.get("id");
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new IllegalArgumentException("User ID cannot be null or empty");
         }
+
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        userInput.forEach((fieldName, value) -> {
+            if (!fieldName.equals("id")) { // Prevent updating ID
+                try {
+                    Field field = User.class.getDeclaredField(fieldName);
+                    if(Objects.isNull(field)) {
+                        throw new IllegalArgumentException("The field " + fieldName + " is null or empty");
+                    }
+                    field.setAccessible(true);
+
+                    Column annotation = field.getAnnotation(Column.class);
+                    boolean isNullable = annotation != null && annotation.nullable();
+
+                    if (!isNullable && Objects.isNull(value)) {
+                        throw new IllegalArgumentException("The field " + fieldName + " cannot be null");
+                    }
+
+                    field.set(existingUser, value);
+                } catch (NoSuchFieldException e) {
+                    logger.warn("Field {} does not exist in User entity, skipping...", fieldName);
+                } catch (IllegalAccessException e) {
+                    logger.error("Unable to access field {} in User entity", fieldName, e);
+                    throw new RuntimeException("Failed to update user field: " + fieldName, e);
+                }
+            }
+        });
+
+        return userRepository.save(existingUser);
     }
 
     private User mapToUser(UserInput input) {
@@ -151,132 +185,67 @@ public class UserService {
         user.setPassword(input.password());
         user.setServiceType(input.serviceType());
         user.setRank(input.rank());
-        user.setRoles(input.roles().stream()
-                .map(roleInput -> roleRepository.findByName(roleInput.name()))
-                .collect(Collectors.toSet()));
+        List<UserRole> userRoles = input.roles().stream()
+                .map(roleInput -> {
+                    Role role = roleRepository.findByName(roleInput.name());
+                    UserRole userRole = new UserRole();
+                    userRole.setUser(user);
+                    userRole.setRole(role);
+
+                    return userRole;
+                })
+                .toList();
         Group group = groupRepository.findByName(input.group());
         user.setGroup(group);
+        user.setRoles(userRoles);
         return user;
     }
 
-    private List<User> handleGroupQuery(Object group) throws Exception {
-        if (!(group instanceof Map)) {
-            throw new IllegalArgumentException("Group value must be a Map");
+    /**
+     * Converts nested field names into Spring Data JPA method format.
+     * Example:
+     * - "firstName" -> "findByFirstName"
+     * - "group.id" -> "findByGroupId"
+     */
+    private String buildMethodName(String fieldName, Object value) {
+        StringBuilder methodName = new StringBuilder("findBy");
+
+        String[] parts = fieldName.split("\\.");
+        for (String part : parts) {
+            methodName.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
         }
 
-        Map<String, Object> groupMap = (Map<String, Object>) group;
-
-        if (groupMap.containsKey("name")) {
-            Object groupName = groupMap.get("name");
-            if (groupName != null) {
-                return userRepository.findByGroupName(groupName.toString());
+        if (value instanceof Map<?, ?> mapValue) {
+            if (!mapValue.isEmpty()) {
+                String nestedKey = mapValue.keySet().iterator().next().toString();
+                methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
             }
         }
 
-        if (groupMap.containsKey("id")) {
-            Object groupId = groupMap.get("id");
-            if (groupId != null) {
-                return userRepository.findByGroup_Id(groupId.toString());
-            }
-        }
-
-        throw new IllegalArgumentException("Invalid group fields: Must contain either 'name' or 'id'");
+        return methodName.toString();
     }
 
-    private List<User> handleDebriefQuery(Object debrief) throws Exception {
-        if (!(debrief instanceof Map)) {
-            throw new IllegalArgumentException("Debrief value must be a Map");
+    private List<Field> getAllFields(Class clazz) {
+        if (clazz == null) {
+            return Collections.emptyList();
         }
 
-        Map<String, Object> debriefMap = (Map<String, Object>) debrief;
-
-        if (debriefMap.containsKey("id")) {
-            Object debriefid = debriefMap.get("id");
-            if (debriefid != null) {
-                Debrief existingDebrief = debriefRepository.findById((Long)debriefid)
-                        .orElseThrow(() -> new IllegalArgumentException("debrief not found with id: " + debriefid));
-                return List.of(existingDebrief.getUser());
-            }
-        }
-
-        if (debriefMap.containsKey("date")) {
-            Object debriefDate = debriefMap.get("date");
-            if (debriefDate != null) {
-                List<Debrief> existingDebrief = debriefRepository.findByDate((LocalDate)debriefDate);
-                if (existingDebrief != null) {
-                    return existingDebrief.stream().map(Debrief::getUser).collect(Collectors.toList());
-                }
-            }
-        }
-
-        throw new IllegalArgumentException("Invalid debrief fields: Must contain either: 'id' or 'date'");
+        List<Field> result = new ArrayList<>(getAllFields(clazz.getSuperclass()));
+        List<Field> filteredFields = Arrays.stream(clazz.getDeclaredFields())
+                .filter(f -> Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))
+                .collect(Collectors.toList());
+        result.addAll(filteredFields);
+        return result;
     }
 
-    private List<User> handleMissionQuery(Object mission) throws Exception {
-        if (!(mission instanceof Map)) {
-            throw new IllegalArgumentException("Mission value must be a Map");
+    private Optional<Field> findField(Class<?> clazz, String fieldName) {
+        if (clazz == null || fieldName == null || fieldName.isEmpty()) {
+            return Optional.empty();
         }
 
-        Map<String, Object> missionMap = (Map<String, Object>) mission;
-
-        if (missionMap.containsKey("id")) {
-            Object missionId = missionMap.get("id");
-            if (missionId != null) {
-                Mission existingMission = missionRepository.findById((Long)missionId)
-                        .orElseThrow(() -> new IllegalArgumentException("mission not found with id: " + missionId));
-                return List.of(existingMission.getUser());
-            }
-        }
-
-        if (missionMap.containsKey("startDate")) {
-            Object missionDate = missionMap.get("startDate");
-            if (missionDate != null) {
-                List<Mission> missions = missionRepository.findByStartDate((LocalDate)missionDate);
-                if (missions != null) {
-                    return missions.stream().map(Mission::getUser).collect(Collectors.toList());
-                }
-            }
-        }
-
-        if (missionMap.containsKey("deadline")) {
-            Object missionDate = missionMap.get("deadline");
-            if (missionDate != null) {
-                List<Mission> missions = missionRepository.findByDeadline((LocalDate)missionDate);
-                if (missions != null) {
-                    return missions.stream().map(Mission::getUser).collect(Collectors.toList());
-                }
-            }
-        }
-
-        throw new IllegalArgumentException("Invalid mission fields: Must contain either 'id' or 'start date' or 'deadline'");
-    }
-
-    private List<User> handleRoleQuery(Object role) throws Exception {
-
-        if (!(role instanceof Map)) {
-            throw new IllegalArgumentException("Role value must be a Map");
-        }
-
-        Map<String, Object> roleMap = (Map<String, Object>) role;
-
-        if (roleMap.containsKey("id")) {
-            Object roleId = roleMap.get("id");
-            if (roleId != null) {
-                Role existingRole = roleRepository.findById((Long) roleId)
-                        .orElseThrow(() -> new IllegalArgumentException("role not found with id: " + roleId));
-                return existingRole.getUsers().stream().toList();
-            }
-        }
-
-        if (roleMap.containsKey("name")) {
-            Object roleName = roleMap.get("name");
-            if (roleName != null) {
-                Role existingRole = roleRepository.findByName((String)roleName);
-                return existingRole.getUsers().stream().toList();
-            }
-        }
-
-        throw new IllegalArgumentException("Invalid role fields: Must contain either 'id' or 'name'");
+        return getAllFields(clazz).stream()
+                .filter(field -> field.getName().equals(fieldName))
+                .findFirst();
     }
 
 }

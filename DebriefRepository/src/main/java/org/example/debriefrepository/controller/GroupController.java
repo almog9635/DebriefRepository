@@ -31,7 +31,7 @@ public class GroupController {
     }
 
     @MutationMapping
-    public Group addGroup(@Argument("input") GroupInput groupinput) {
+    public Group createGroup(@Argument("input") GroupInput groupinput) {
         return groupService.create(groupinput);
     }
 
