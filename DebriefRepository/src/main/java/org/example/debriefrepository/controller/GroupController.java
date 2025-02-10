@@ -1,11 +1,13 @@
 package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.Group;
 import org.example.debriefrepository.service.GroupService;
 import org.example.debriefrepository.types.GroupInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -31,13 +33,28 @@ public class GroupController {
     }
 
     @MutationMapping
-    public Group createGroup(@Argument("input") GroupInput groupinput) {
-        return groupService.create(groupinput);
+    public Group createGroup(@Argument("input") GroupInput groupinput,  @ContextValue String userId) {
+        Group newGroup = null;
+        try{
+            UserContext.setCurrentUserId(userId);
+            newGroup = groupService.create(groupinput);
+        }finally {
+            UserContext.clear();
+        }
+        return newGroup;
     }
 
     @MutationMapping
-    public Group updateGroup(@Argument("input") Map<String, Object> input) {
-        return groupService.update(input);
+    public Group updateGroup(@Argument("input") Map<String, Object> input, @ContextValue String userId) {
+        Group newGroup = null;
+        try{
+            UserContext.setCurrentUserId(userId);
+            newGroup = groupService.update(input);
+        }finally {
+            UserContext.clear();
+        }
+
+        return newGroup;
     }
 
     @MutationMapping
