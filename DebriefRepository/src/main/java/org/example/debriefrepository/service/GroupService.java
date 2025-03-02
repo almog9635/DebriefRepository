@@ -113,8 +113,7 @@ public class GroupService {
 
     public Group update(Map<String, Object> input) {
         try {
-            Group existingGroup = groupRepository.findById((Long) input.get("id"))
-                    .orElse(null);
+            Group existingGroup = groupRepository.findById((String)input.get("id")).orElse(null);
             if (existingGroup != null) {
                 for (Map.Entry<String, Object> entry : input.entrySet()) {
                     String key = entry.getKey();
@@ -125,8 +124,8 @@ public class GroupService {
                             break;
 
                         case "commander":
-                            existingGroup.setCommander((userRepository.findById(Long.parseLong(value.toString()))
-                                    .orElse(null)));
+                            existingGroup.setCommander(userRepository.findById(value.toString())
+                                    .orElse(null));
                             break;
 
                         case "users":
@@ -205,7 +204,7 @@ public class GroupService {
     }
 
     @Transactional
-    public Boolean deleteById(Long id) {
+    public Boolean deleteById(String id) {
         if (groupRepository.existsById(id)) {
             try{
                 groupRepository.deleteById(id);

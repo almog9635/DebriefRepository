@@ -8,9 +8,9 @@ public record UserInput(
         String firstName,
         String lastName,
         String password,
-        List<RoleInput> roles,
-        String rank,
+        List<String> roles,
+        Rank rank,
         String group,
-        String serviceType,
-        List<Long> missions) {
+        ServiceType serviceType,
+        List<String> missions) {
 }

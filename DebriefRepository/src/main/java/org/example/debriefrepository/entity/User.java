@@ -3,6 +3,8 @@ package org.example.debriefrepository.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.debriefrepository.types.Rank;
+import org.example.debriefrepository.types.ServiceType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,19 +15,21 @@ import java.util.List;
 @Table(name = "\"user\"", schema = "debrief_mgmt")
 public class User extends BaseEntity {
     
-    @Column(name = "last_name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "service_type", nullable = false, length = Integer.MAX_VALUE)
-    private String serviceType;
+    @Column(name = "service_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ServiceType serviceType;
 
-    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "rank", nullable = false, length = Integer.MAX_VALUE)
-    private String rank;
+    @Column(name = "rank", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Rank rank;
 
-    @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

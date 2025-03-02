@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @MutationMapping
-    public User updateUser(@Argument("input") Map<String, Object> user, @ContextValue String userId) {
+    public User updateUser(@Argument("input") UserInput user, @ContextValue String userId) {
         User newUser = null;
         try {
             UserContext.setCurrentUserId(userId);

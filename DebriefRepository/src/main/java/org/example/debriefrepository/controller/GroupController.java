@@ -58,7 +58,7 @@ public class GroupController {
     }
 
     @MutationMapping
-    public Boolean deleteGroup(@Argument("id") Long id) {
+    public Boolean deleteGroup(@Argument("id") String id) {
         return groupService.deleteById(id);
     }
 }

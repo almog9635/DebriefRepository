@@ -13,7 +13,7 @@ import java.util.List;
 @Table(name = "\"group\"", schema = "debrief_mgmt")
 public class Group extends BaseEntity {
 
-    @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)

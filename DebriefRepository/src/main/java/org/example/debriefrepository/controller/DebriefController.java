@@ -41,7 +41,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Boolean deleteDebrief(@Argument("id") Long id) {
+    public Boolean deleteDebrief(@Argument("id") String id) {
         return debriefService.deleteDebriefById(id);
     }
 }

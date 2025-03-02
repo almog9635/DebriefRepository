@@ -30,7 +30,7 @@ input UserUpdate{
     firstName: String
     lastName: String
     password: String
-    roles: [RoleInput!]
+    roles: [ID!]
     serviceType: ServiceTypeEnum
     rank: RankEnum
     group: String

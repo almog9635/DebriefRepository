@@ -57,7 +57,7 @@ public class DebriefService {
 
             switch (key) {
                 case "id":
-                    Debrief debrief = debriefRepository.findById(Long.parseLong(value.toString()))
+                    Debrief debrief = debriefRepository.findById(value.toString())
                             .orElseThrow(() -> new IllegalArgumentException("Debrief not found with id: " + value));
                     return List.of(debrief);
 
@@ -91,12 +91,18 @@ public class DebriefService {
         return null;
     }
 
-    public Boolean deleteDebriefById(Long id) {
-        if(debriefRepository.findById(id).orElse(null) == null) {
-            return false;
+    public Boolean deleteDebriefById(String id) {
+        if(debriefRepository.existsById(id)) {
+            try{
+                debriefRepository.deleteById(id);
+            }catch (Exception e){
+                e.printStackTrace();
+                return false;
+            }
+            return true;
         }
-        debriefRepository.deleteById(id);
-        return true;
+
+        return false;
     }
 
     /* todo: understand how to get the lessons and missions
