@@ -1,8 +1,8 @@
 type Mission{
     id: ID!
     content: String!
-    startDate: Date!
-    deadline: Date!
+    startDate: ZonedDateTime!
+    deadline: ZonedDateTime!
     user: User!
     debrief: Debrief!
     lesson: Lesson
@@ -11,8 +11,8 @@ type Mission{
 input MissionInput{
     id: ID
     content: String
-    startDate: Date
-    deadline: Date
+    startDate: ZonedDateTime
+    deadline: ZonedDateTime
     user: UserInput
     debrief: DebriefInput
     lesson: LessonInput
@@ -20,8 +20,8 @@ input MissionInput{
 
 input MissionUpdate{
     content: String!
-    startDate: Date!
-    deadline: Date!
+    startDate: ZonedDateTime!
+    deadline: ZonedDateTime!
     user: ID!
     debrief: ID!
     lesson: ID

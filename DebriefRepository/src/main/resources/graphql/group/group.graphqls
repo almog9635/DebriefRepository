@@ -1,7 +1,7 @@
 type Group{
     id: ID!
     name: String!
-    commander: User!
+    commander: User
     users: [User!]!
     debriefs: [Debrief!]!
 }

@@ -1,15 +1,14 @@
 package org.example.debriefrepository.types;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.time.LocalDate;
-import java.util.Set;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 public record DebriefInput(
+        String id,
         String content,
-        LocalDate date,
-        Long userId,
+        ZonedDateTime date,
+        String userId,
         String group,
-        Set<Long> lessons,
-        Set<Long> missions) {
+        List<Long> lessons,
+        List<Long> missions) {
 }

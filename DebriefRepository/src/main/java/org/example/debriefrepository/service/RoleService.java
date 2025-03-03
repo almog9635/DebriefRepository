@@ -6,7 +6,6 @@ import org.example.debriefrepository.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public class RoleService {
 
             switch (key) {
                 case "id":
-                    Role role = roleRepository.findById(Long.parseLong(value.toString()))
+                    Role role = roleRepository.findById(value.toString())
                             .orElseThrow(() -> new IllegalArgumentException("Debrief not found with id: " + value));
                     return role;
 

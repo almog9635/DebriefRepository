@@ -1,14 +1,17 @@
 package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.User;
 import org.example.debriefrepository.service.UserService;
 import org.example.debriefrepository.types.UserInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
+
 
 import java.util.List;
 import java.util.Map;
@@ -31,17 +34,33 @@ public class UserController {
     }
 
     @MutationMapping
-    public User addUser(@Argument("input") UserInput user) {
-        return userService.createUser(user);
+    public User createUser(@Argument("input") UserInput user, @ContextValue String userId) {
+        User newUser = null;
+        try {
+            UserContext.setCurrentUserId(userId);
+            newUser =  userService.createUser(user);
+        }
+        finally {
+            UserContext.clear();
+        }
+        return newUser;
     }
 
     @MutationMapping
-    public User updateUser(@Argument("input") Map<String, Object> user) {
-        return userService.update(user);
+    public User updateUser(@Argument("input") UserInput user, @ContextValue String userId) {
+        User newUser = null;
+        try {
+            UserContext.setCurrentUserId(userId);
+            newUser =  userService.update(user);
+        }
+        finally {
+            UserContext.clear();
+        }
+        return newUser;
     }
 
     @MutationMapping
-    public Boolean deleteUser(@Argument Long id) {
+    public Boolean deleteUser(@Argument String id) {
         return userService.deleteById(id);
     }
 

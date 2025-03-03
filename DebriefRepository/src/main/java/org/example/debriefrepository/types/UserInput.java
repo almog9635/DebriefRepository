@@ -1,14 +1,16 @@
 package org.example.debriefrepository.types;
 
+import java.util.List;
 import java.util.Set;
 
 public record UserInput(
+        String id,
         String firstName,
         String lastName,
         String password,
-        Set<RoleInput> roles,
-        String rank,
+        List<String> roles,
+        Rank rank,
         String group,
-        String serviceType,
-        Set<Long> missions) {
+        ServiceType serviceType,
+        List<String> missions) {
 }

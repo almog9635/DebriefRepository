@@ -1,11 +1,10 @@
 package org.example.debriefrepository.types;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Set;
+import java.util.List;
 
 public record LessonInput(
+        String id,
         String content,
-        Long debriefId,
-        Set<Long> missions) {
+        String debriefId,
+        List<Long> missions) {
 }

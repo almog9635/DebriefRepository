@@ -31,7 +31,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Debrief addDebrief(@Argument("input") DebriefInput debrief) {
+    public Debrief createDebrief(@Argument("input") DebriefInput debrief) {
         return debriefService.createDebrief(debrief);
     }
 
@@ -41,7 +41,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Boolean deleteDebrief(@Argument("id") Long id) {
+    public Boolean deleteDebrief(@Argument("id") String id) {
         return debriefService.deleteDebriefById(id);
     }
 }
