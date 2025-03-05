@@ -1,6 +1,6 @@
 type Debrief{
     id: ID!
-    content: String!
+    content: [ContentItem!]!
     date: ZonedDateTime!
     user: User!
     group: Group!
