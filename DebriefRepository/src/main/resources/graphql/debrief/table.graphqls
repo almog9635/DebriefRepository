@@ -1,0 +1,5 @@
+type Table implements OrderItem {
+    index: Int!
+    rows: [Row!]!
+    columns: [Column!]!
+}
