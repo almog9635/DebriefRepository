@@ -45,7 +45,7 @@ public class GroupController {
     }
 
     @MutationMapping
-    public Group updateGroup(@Argument("input") Map<String, Object> input, @ContextValue String userId) {
+    public Group updateGroup(@Argument("input") GroupInput input, @ContextValue String userId) {
         Group newGroup = null;
         try{
             UserContext.setCurrentUserId(userId);

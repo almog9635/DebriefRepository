@@ -10,4 +10,8 @@ type Mutation {
     createGroup(input: GroupUpdate!): Group!
     updateGroup(input: GroupUpdate!): Group!
     deleteGroup(id: ID!): Boolean
+
+    createRole(input: RoleUpdate!): Role!
+    updateRole(input: RoleUpdate!): Role!
+    deleteRole(id: ID!): Boolean
 }

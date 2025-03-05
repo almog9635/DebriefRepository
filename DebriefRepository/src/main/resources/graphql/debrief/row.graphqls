@@ -1,0 +1,4 @@
+type Row implements OrderItem{
+    index: Int!
+    cells: [String!]!
+}

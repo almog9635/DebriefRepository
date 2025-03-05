@@ -43,11 +43,11 @@ public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> REPOSITORY_MAP;
+    private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> repositories;
 
     @PostConstruct
     private void init() {
-        REPOSITORY_MAP = Map.of(
+        repositories = Map.of(
                 Group.class, groupRepository,
                 Role.class, roleRepository,
                 Mission.class, missionRepository,
@@ -234,7 +234,7 @@ public class UserService {
         if(type == UserRole.class){
             type = Role.class;
         }
-        JpaRepository<? extends BaseEntity, String> repository = REPOSITORY_MAP.get(type);
+        JpaRepository<? extends BaseEntity, String> repository = repositories.get(type);
 
 
         // @ManyToOne fields cases
