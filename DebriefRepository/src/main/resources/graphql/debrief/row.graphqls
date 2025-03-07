@@ -1,9 +1,29 @@
 type Row implements OrderItem{
+    id: ID!
     index: Int!
     cells: [Cell!]!
+    table: Table!
 }
 
 type Cell implements OrderItem {
+    id: ID!
     index: Int!
     value: String
+    row: Row!
+    column: Column!
+}
+
+input RowInput{
+    id: ID
+    index: Int
+    cells: [CellInput!]!
+    table: ID
+}
+
+input CellInput{
+    id: ID
+    index: Int
+    value: String
+    row: ID
+    column: ID
 }

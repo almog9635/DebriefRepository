@@ -1,10 +1,11 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 @Getter
@@ -13,7 +14,7 @@ import java.time.ZonedDateTime;
 @Table(name = "mission", schema = "debrief_mgmt")
 public class Mission extends BaseEntity {
 
-    @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "content", nullable = false)
     private String content;
 
     @Column(name = "start_date", nullable = false)

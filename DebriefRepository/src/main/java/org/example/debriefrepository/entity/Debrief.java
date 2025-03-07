@@ -1,6 +1,8 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,8 +27,8 @@ public class Debrief extends BaseEntity{
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
-    @Column(name = "content", nullable = false, length = Integer.MAX_VALUE)
-    private String content;
+    @OneToMany(mappedBy = "debrief")
+    private List<ContentItem> contentItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "debrief")
     private List<Lesson> lessons = new ArrayList<>();

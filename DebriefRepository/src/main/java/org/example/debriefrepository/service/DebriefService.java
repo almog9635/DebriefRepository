@@ -140,7 +140,7 @@ public class DebriefService {
 
     private Debrief mapToDebrief(DebriefInput input) {
         Debrief debrief = new Debrief();
-        debrief.setContent(input.content());
+        //debrief.setContent(input.content());
         debrief.setDate(input.date());
         debrief.setGroup(groupRepository.findByName(input.group()));
         //debrief.setLessons();

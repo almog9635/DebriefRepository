@@ -1,2 +1,1 @@
-union ContentItem  = Table | Comments
-
+union ContentItem  = Table | Paragraph

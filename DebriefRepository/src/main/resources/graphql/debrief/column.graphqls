@@ -1,4 +1,15 @@
 type Column implements OrderItem {
+    id: ID!
     index: Int!
     name: String!
+    table: Table!
+    cells: [Cell!]!
+}
+
+input ColumnInput{
+    id: ID
+    index: Int
+    name: String
+    table: ID
+    cell: [CellInput!]
 }

@@ -1,0 +1,28 @@
+type Comment implements OrderItem{
+    id: ID!
+    index: Int!
+    bullet : String!
+    paragraph: Paragraph!
+}
+
+type Paragraph implements OrderItem{
+    id: ID!
+    index: Int!
+    title: String!
+    comments: [Comment!]!
+}
+
+input CommentInput {
+    id: ID
+    index: Int
+    bullet: String
+    paragraph: ID
+}
+
+input ParagraphInput {
+    id: ID
+    index: Int
+    title: String
+    comments: [CommentInput!]
+}
+
