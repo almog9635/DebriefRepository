@@ -5,9 +5,9 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 
-@MappedSuperclass
 @Getter
 @Setter
+@MappedSuperclass
 public class OrderedItem extends BaseEntity {
 
     @Column(name = "index", nullable = false)

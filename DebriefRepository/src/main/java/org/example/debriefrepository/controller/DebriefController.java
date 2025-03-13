@@ -3,7 +3,7 @@ package org.example.debriefrepository.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Debrief;
 import org.example.debriefrepository.service.DebriefService;
-import org.example.debriefrepository.types.DebriefInput;
+import org.example.debriefrepository.types.input.DebriefInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -36,7 +36,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Debrief updateDebrief(@Argument("input") Map<String, Object> input) {
+    public Debrief updateDebrief(@Argument("input") DebriefInput input) {
         return debriefService.updateDebrief(input);
     }
 

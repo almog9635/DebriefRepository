@@ -1,14 +1,16 @@
-type Table implements OrderItem {
+type Table implements ContentItem & OrderItem {
     id: ID!
     index: Int!
+    name: String!
     rows: [Row!]!
-    columns: [Column!]!
+    columns: [Col!]!
 }
 
 input TableInput {
     id: ID
     index: Int
+    name: String
     rows: [RowInput!]
-    columns: [ColumnInput!]
+    columns: [ColInput!]
 }
 

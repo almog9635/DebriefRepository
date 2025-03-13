@@ -9,8 +9,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "content_item", schema = "debrief_mgmt")
-public class ContentItem extends OrderedItem{
+@DiscriminatorColumn
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "content_items", schema = "debrief_mgmt")
+public abstract class ContentItem extends OrderedItem{
 
     @Column(name = "name", nullable = false)
     private String name;

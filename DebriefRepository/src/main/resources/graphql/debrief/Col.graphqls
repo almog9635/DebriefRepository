@@ -1,4 +1,4 @@
-type Column implements OrderItem {
+type Col implements OrderItem {
     id: ID!
     index: Int!
     name: String!
@@ -6,7 +6,7 @@ type Column implements OrderItem {
     cells: [Cell!]!
 }
 
-input ColumnInput{
+input ColInput{
     id: ID
     index: Int
     name: String

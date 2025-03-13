@@ -1,7 +1,7 @@
 package org.example.debriefrepository.entity;
 
-import jakarta.persistence.Table;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "cell", schema = "debrief_mgmt")
-public class Cell extends OrderedItem{
+public class Cell extends BaseEntity {
 
-    @jakarta.persistence.Column(name = "value")
+    @Column(name = "value")
     private String value;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -20,6 +20,6 @@ public class Cell extends OrderedItem{
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "column_id", nullable = false)
-    private Column column;
+    private TableColumn column;
 
 }

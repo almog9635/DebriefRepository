@@ -1,5 +1,7 @@
 package org.example.debriefrepository.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
@@ -11,18 +13,15 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@jakarta.persistence.Table(name = "\"table\"", schema = "debrief_mgmt")
-public class Table extends OrderedItem {
+@DiscriminatorValue("TABLE")
+//@jakarta.persistence.Table(name = "\"table\"", schema = "debrief_mgmt")
+public class Table extends ContentItem{
 
-    @jakarta.persistence.Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
-    
-
-    @jakarta.persistence.Column(name = "debrief_id", nullable = false)
-    private String debriefId;
 
     @OneToMany(mappedBy = "table")
-    private List<Column> columns = new ArrayList<>();
+    private List<TableColumn> cols = new ArrayList<>();
 
     @OneToMany(mappedBy = "table")
     private List<Row> rows = new ArrayList<>();

@@ -1,1 +1,16 @@
-union ContentItem  = Table | Paragraph
+interface ContentItem implements OrderItem {
+    id: ID!
+    index: Int!
+    name: String!
+}
+
+input ContentItemInput {
+    contentType: ContentType
+    id: ID
+    index: Int
+    name: String
+    table: TableInput
+    paragraph: ParagraphInput
+}
+
+union Content = Table | Paragraph

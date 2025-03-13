@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.User;
 import org.example.debriefrepository.service.UserService;
-import org.example.debriefrepository.types.UserInput;
+import org.example.debriefrepository.types.input.UserInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;

@@ -8,10 +8,10 @@ import org.example.debriefrepository.listener.MetadataListener;
 
 import java.util.UUID;
 
-@MappedSuperclass
-@EntityListeners(MetadataListener.class)
 @Getter
 @Setter
+@MappedSuperclass
+@EntityListeners(MetadataListener.class)
 public class BaseEntity {
 
     @Id

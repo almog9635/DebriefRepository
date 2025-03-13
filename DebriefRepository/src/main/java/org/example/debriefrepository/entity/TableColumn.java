@@ -10,10 +10,10 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@jakarta.persistence.Table(name = "\"column\"", schema = "debrief_mgmt")
-public class Column extends OrderedItem {
+@jakarta.persistence.Table(name = "table_column", schema = "debrief_mgmt")
+public class TableColumn extends OrderedItem {
 
-    @jakarta.persistence.Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
