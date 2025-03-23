@@ -48,15 +48,15 @@ public class UserController {
 
     @MutationMapping
     public User updateUser(@Argument("input") UserInput user, @ContextValue String userId) {
-        User newUser = null;
+        User updatedUser = null;
         try {
             UserContext.setCurrentUserId(userId);
-            newUser =  userService.update(user);
+            updatedUser =  userService.update(user);
         }
         finally {
             UserContext.clear();
         }
-        return newUser;
+        return updatedUser;
     }
 
     @MutationMapping

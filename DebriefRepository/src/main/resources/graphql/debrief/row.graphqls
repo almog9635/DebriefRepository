@@ -1,4 +1,4 @@
-type Row implements OrderItem{
+type Row implements OrderedItem{
     id: ID!
     index: Int!
     cells: [Cell!]!
@@ -9,5 +9,4 @@ input RowInput{
     id: ID
     index: Int
     cells: [CellInput!]
-    table: ID
 }

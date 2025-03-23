@@ -1,16 +1,12 @@
-interface ContentItem implements OrderItem {
+interface ContentItem implements OrderedItem {
     id: ID!
     index: Int!
     name: String!
 }
 
-input ContentItemInput {
-    contentType: ContentType
-    id: ID
-    index: Int
-    name: String
-    table: TableInput
-    paragraph: ParagraphInput
+input ContentInput{
+    paragraphs: [ParagraphInput!]
+    tables: [TableInput!]
 }
 
 union Content = Table | Paragraph

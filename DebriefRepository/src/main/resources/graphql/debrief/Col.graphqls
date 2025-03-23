@@ -1,4 +1,4 @@
-type Col implements OrderItem {
+type Col implements OrderedItem {
     id: ID!
     index: Int!
     name: String!
@@ -10,6 +10,5 @@ input ColInput{
     id: ID
     index: Int
     name: String
-    table: ID
     cell: [CellInput!]
 }

@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class TableInput extends ContentItemInput {
+public class TableInput extends ContentItem {
 
     List<ColumnInput> cols;
     List<RowInput> rows;

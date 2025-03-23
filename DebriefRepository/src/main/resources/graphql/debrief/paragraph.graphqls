@@ -1,11 +1,11 @@
-type Paragraph implements ContentItem & OrderItem {
+type Paragraph implements ContentItem & OrderedItem {
     id: ID!
     index: Int!
     name: String!
     comments: [Comment!]!
 }
 
-type Comment implements OrderItem{
+type Comment implements OrderedItem{
     id: ID!
     index: Int!
     bullet : String!
@@ -16,7 +16,6 @@ input CommentInput {
     id: ID
     index: Int
     bullet: String
-    paragraph: ID
 }
 
 input ParagraphInput {

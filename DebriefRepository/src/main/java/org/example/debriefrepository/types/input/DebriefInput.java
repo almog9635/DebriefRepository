@@ -1,13 +1,13 @@
 package org.example.debriefrepository.types.input;
 
-import org.example.debriefrepository.types.content.ContentItemInput;
+import org.example.debriefrepository.types.content.ContentInput;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
 public record DebriefInput(
         String id,
-        List<ContentItemInput> contentItems,
+        ContentInput content,
         ZonedDateTime date,
         String user,
         String group,

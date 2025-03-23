@@ -1,4 +1,4 @@
-interface OrderItem{
+interface OrderedItem{
     id: ID!
     index: Int!
 }

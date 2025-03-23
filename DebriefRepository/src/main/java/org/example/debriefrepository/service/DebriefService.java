@@ -176,8 +176,9 @@ public class DebriefService {
             try{
                 Object value = getFieldValue(input, fieldName);
 
+
                 if(value != null) {
-                    System.out.println(value.getClass().getName());
+
                     entityField.set(debrief, value);
                 } else{
                     Column annotation = entityField.getAnnotation(Column.class);

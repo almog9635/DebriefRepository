@@ -1,6 +1,6 @@
 type Debrief{
     id: ID!
-    content: [Content!]!
+    contentItems: [Content!]!
     date: ZonedDateTime!
     user: User!
     group: Group!
@@ -10,7 +10,7 @@ type Debrief{
 
 input DebriefInput{
     id : ID
-    content: [ContentItemInput!]
+    content: ContentInput
     date: ZonedDateTime
     user: ID
     group: GroupInput
@@ -19,7 +19,7 @@ input DebriefInput{
 }
 
 input DebriefUpdate{
-    content: [ContentItemInput!]
+    content: ContentInput
     date: ZonedDateTime
     user: ID
     group: String

@@ -1,4 +1,4 @@
-type Table implements ContentItem & OrderItem {
+type Table implements ContentItem & OrderedItem {
     id: ID!
     index: Int!
     name: String!
