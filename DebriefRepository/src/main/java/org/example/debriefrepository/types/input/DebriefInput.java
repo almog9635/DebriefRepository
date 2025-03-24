@@ -7,7 +7,7 @@ import java.util.List;
 
 public record DebriefInput(
         String id,
-        ContentInput content,
+        ContentInput contentItems,
         ZonedDateTime date,
         String user,
         String group,

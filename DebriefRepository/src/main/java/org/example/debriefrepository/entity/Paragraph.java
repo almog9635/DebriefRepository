@@ -15,9 +15,6 @@ import java.util.List;
 //@Table(name = "paragraph", schema = "debrief_mgmt")
 public class Paragraph extends ContentItem{
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
     @OneToMany(mappedBy = "paragraph")
     private List<Comment> comments = new ArrayList<>();
 

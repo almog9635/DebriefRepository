@@ -22,7 +22,8 @@ public class CommentService extends OrderedItemService {
         Comment comment = new Comment();
         try {
             comment = setFields(comment, input);
-            comment = setParagraph(comment, paragraphId);
+            comment.setParagraph(paragraphRepository.findById(paragraphId).
+                    orElseThrow(() -> new IllegalArgumentException("Invalid paragraph id: " + paragraphId)));
             return commentRepository.save(comment);
         } catch (Exception e) {
             logger.error("Error creating comment: {}", e.getMessage(), e);
@@ -46,13 +47,6 @@ public class CommentService extends OrderedItemService {
         }
 
         comment.setBullet(input.getBullet());
-        return comment;
-    }
-
-    private Comment setParagraph(Comment comment, String paragraphId) {
-        Paragraph paragraph = paragraphRepository.findById(paragraphId)
-                .orElseThrow(() -> new IllegalArgumentException("Paragraph not found"));
-        comment.setParagraph(paragraph);
         return comment;
     }
 

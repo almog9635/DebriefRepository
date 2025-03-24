@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Comment;
 import org.example.debriefrepository.entity.Paragraph;
 import org.example.debriefrepository.repository.CommentRepository;
+import org.example.debriefrepository.repository.DebriefRepository;
 import org.example.debriefrepository.repository.ParagraphRepository;
 import org.example.debriefrepository.types.content.CommentInput;
 import org.example.debriefrepository.types.content.ParagraphInput;
@@ -25,14 +26,20 @@ public class ParagraphService extends OrderedItemService {
 
     private final CommentService commentService;
 
+    private final DebriefRepository debriefRepository;
+
     private final Logger logger = LoggerFactory.getLogger(ParagraphService.class);
 
-    public Paragraph createParagraph(ParagraphInput paragraphInput) {
+    public Paragraph createParagraph(ParagraphInput paragraphInput, String debriefId) {
         Paragraph paragraph = new Paragraph();
-        // Copy common fields using reflection via the superclass method.
-        paragraph = setFields(paragraph, paragraphInput);
-        // Persist initial paragraph to generate an ID (if needed)
-        paragraph = paragraphRepository.save(paragraph);
+        paragraph = setFields(paragraph, paragraphInput, debriefId);
+
+        try{
+            paragraphRepository.save(paragraph);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new RuntimeException("Error creating paragraph: " + paragraphInput, e);
+        }
 
         List<CommentInput> comments = paragraphInput.getComments();
         if (comments != null && !comments.isEmpty()) {
@@ -42,7 +49,14 @@ public class ParagraphService extends OrderedItemService {
                 savedComments.add(comment);
             }
             paragraph.setComments(savedComments);
-            paragraph = paragraphRepository.save(paragraph);
+
+            try{
+                paragraph = paragraphRepository.save(paragraph);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Error creating paragraph: " + paragraphInput, e);
+            }
+
         }
         return paragraph;
     }
@@ -52,7 +66,7 @@ public class ParagraphService extends OrderedItemService {
         Paragraph paragraph = paragraphRepository.findById(paragraphId)
                 .orElseThrow(() -> new IllegalArgumentException("Paragraph not found"));
 
-        paragraph = setFields(paragraph, paragraphInput);
+        paragraph = setFields(paragraph, paragraphInput, "");
 
         List<CommentInput> comments = paragraphInput.getComments();
         if (Objects.nonNull(comments) && !comments.isEmpty()) {
@@ -72,11 +86,21 @@ public class ParagraphService extends OrderedItemService {
         return paragraphRepository.save(paragraph);
     }
 
-    protected Paragraph setFields(Paragraph paragraph, ParagraphInput paragraphInput) {
-        // Delegate the common field copying to the parent class.
+    private Paragraph setFields(Paragraph paragraph, ParagraphInput paragraphInput, String debriefId) {
         paragraph = (Paragraph) super.setFields(paragraph, paragraphInput);
-        // Set additional Paragraph-specific fields.
-        paragraph.setName(paragraphInput.getName());
+        try{
+            if(Objects.isNull(paragraphInput.getName())){
+                throw new IllegalArgumentException("Paragraph name is null");
+            }
+            paragraph.setName(paragraphInput.getName());
+            if(Objects.isNull(paragraph.getDebrief())){
+                    paragraph.setDebrief(debriefRepository.findById(debriefId)
+                            .orElseThrow(() -> new IllegalArgumentException("Error creating Debrief")));
+            }
+        } catch (IllegalArgumentException e) {
+        logger.error(e.getMessage());
+        throw new RuntimeException("Error creating paragraph: " + paragraphInput, e);
+    }
         return paragraph;
     }
 

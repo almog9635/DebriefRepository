@@ -10,7 +10,7 @@ type Debrief{
 
 input DebriefInput{
     id : ID
-    content: ContentInput
+    contentItems: ContentInput
     date: ZonedDateTime
     user: ID
     group: GroupInput
@@ -19,7 +19,8 @@ input DebriefInput{
 }
 
 input DebriefUpdate{
-    content: ContentInput
+    id: ID
+    contentItems: ContentInput
     date: ZonedDateTime
     user: ID
     group: String

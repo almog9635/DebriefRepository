@@ -21,17 +21,17 @@ public class OrderedItemService {
     private static final Logger logger = LoggerFactory.getLogger(OrderedItemService.class);
 
     protected OrderedItem setFields(OrderedItem item, OrderedItemInput input) {
-        List<Field> fields = getAllFields(item.getClass());
+        List<Field> fields = getAllFields(OrderedItem.class);
 
         for (Field field : fields) {
             field.setAccessible(true);
             String fieldName = field.getName();
 
-            if(fieldName.equals("id") | fieldName.equals("MetaData"))
+            if(fieldName.equals("id") || fieldName.equals("metaData"))
                 continue;
 
             try{
-                Object value = input.getClass().getDeclaredField(fieldName);
+                Object value = getFieldValue(input, fieldName);
                 field.setAccessible(true);
 
                 if(Objects.isNull(value)) {
@@ -48,8 +48,8 @@ public class OrderedItemService {
                 throw new RuntimeException("Field " + fieldName + " not found");
             }
             catch (IllegalArgumentException | IllegalAccessException e) {
-                logger.error("Unable to access field {} in User entity", fieldName, e);
-                throw new RuntimeException("Failed to update user field: " + fieldName, e);
+                logger.error("Unable to access field {} in orderedItem entity", fieldName, e);
+                throw new RuntimeException("Failed to update orderedItem field: " + fieldName, e);
             }
         }
 
@@ -68,14 +68,22 @@ public class OrderedItemService {
         return result;
     }
 
-    protected Object getFieldValue(Object input, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-        if (input instanceof Map) {
-            return ((Map<String, Object>) input).get(fieldName); // Get value from Map
-        } else {
-            Field inputField = input.getClass().getDeclaredField(fieldName);
-            inputField.setAccessible(true);
-            return inputField.get(input); // Get value via reflection
+    public static Object getFieldValue(Object target, String fieldName) {
+        Class<?> clazz = target.getClass();
+
+        while (clazz != null && clazz != Object.class) {
+            try {
+                Field field = clazz.getDeclaredField(fieldName);
+                field.setAccessible(true); // Access private field
+                return field.get(target);  // Return the value
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass(); // Move to superclass
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Cannot access field: " + fieldName, e);
+            }
         }
+
+        throw new IllegalArgumentException("Field '" + fieldName + "' not found in object of type: " + target.getClass().getName());
     }
 
 }

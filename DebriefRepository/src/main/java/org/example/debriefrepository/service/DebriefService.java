@@ -2,9 +2,12 @@ package org.example.debriefrepository.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.*;
 import org.example.debriefrepository.repository.*;
+import org.example.debriefrepository.types.content.ContentInput;
 import org.example.debriefrepository.types.input.DebriefInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +42,9 @@ public class DebriefService {
     @Autowired
     private final LessonRepository lessonRepository;
 
+    @Autowired
+    private final ContentService contentService;
+
     private static final Logger logger = LoggerFactory.getLogger(DebriefService.class);
 
     private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> repositories;
@@ -47,6 +52,7 @@ public class DebriefService {
     @PostConstruct
     private void init() {
         repositories = Map.of(
+                User.class, userRepository,
                 Group.class, groupRepository,
                 Role.class, roleRepository,
                 Mission.class, missionRepository,
@@ -58,12 +64,20 @@ public class DebriefService {
     public Debrief createDebrief(DebriefInput input) {
         Debrief debrief = new Debrief();
         try{
-            return debriefRepository.save(setFields(debrief, input));
+            List<String> skipedFields = new ArrayList<>();
+            skipedFields.add("id");
+            skipedFields.add("contentItems");
+            skipedFields.add("lessons");
+            skipedFields.add("missions");
+            debrief = setFields(debrief, input, skipedFields);
+            debriefRepository.save(debrief);
+            setFields(debrief, input, null);
+            return debriefRepository.save(debrief);
         } catch (Exception e) {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
-        throw new RuntimeException("Error creating user");
+        throw new RuntimeException("Error creating Debrief");
     }
 
     public List<Debrief> getAllDebriefs() {
@@ -157,7 +171,7 @@ public class DebriefService {
         try {
             Debrief existingDebrief = debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found with ID: " + debriefId));
-            return debriefRepository.save(setFields(existingDebrief, debriefUpdate));
+            return debriefRepository.save(setFields(existingDebrief, debriefUpdate, null));
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
@@ -165,33 +179,105 @@ public class DebriefService {
         throw new RuntimeException("Error modifying user");
     }
 
-    private Debrief setFields(Debrief debrief,DebriefInput input) {
-        List<Field> fields = getAllFields(debrief.getClass());
+    /*
+        todo: define a const map of function of types that does not exist before the creation of the debrief
+        such as contentItem or mission
+     */
+    private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skipFields) {
+        Map<String, Function<Object, Object>> customProcessors = new HashMap<>();
+        customProcessors.put("contentItems", rawValue -> {
+            if (rawValue instanceof ContentInput) {
+                return contentService.createContent((ContentInput) rawValue, debrief.getId());
+            }
+            throw new IllegalArgumentException("Invalid value for contentItems field");
+        });
+
+        return setFieldsGeneric(debrief, input, customProcessors, skipFields);
+    }
+
+    private <T, U> T setFieldsGeneric(T entity, U input, Map<String, Function<Object,
+            Object>> customProcessors, List<String> skipFields) {
+        List<Field> fields = getAllFields(entity.getClass());
         for (Field entityField : fields) {
             entityField.setAccessible(true);
             String fieldName = entityField.getName();
 
-            if ("metaData".equals(fieldName)) continue;
+            if ("metaData".equals(fieldName) || (Objects.nonNull(skipFields) &&
+                    skipFields.contains(fieldName))) {
+                continue;
+            }
+            try {
 
-            try{
+                if (customProcessors != null && customProcessors.containsKey(fieldName)) {
+                    Object rawValue = getFieldValue(input, fieldName);
+                    Object processedValue = customProcessors.get(fieldName).apply(rawValue);
+                    entityField.set(entity, processedValue);
+                    continue;
+                }
+
                 Object value = getFieldValue(input, fieldName);
 
+                if (Objects.nonNull(value)) {
+                    if (BaseEntity.class.isAssignableFrom(entityField.getType()) ||
+                            BaseEntity.class.isAssignableFrom(findListType(entityField))) {
+                        value = fetchEntities(entityField, value);
 
-                if(value != null) {
+                    }
+                    entityField.set(entity, value);
+                } else {
 
-                    entityField.set(debrief, value);
-                } else{
                     Column annotation = entityField.getAnnotation(Column.class);
                     boolean isNullable = !(Objects.isNull(annotation)) &&  annotation.nullable();
-                    if(!isNullable && !Objects.isNull(debrief.getClass().getField(fieldName))) {
+
+                    if (!isNullable && Objects.nonNull(entity.getClass().getField(fieldName))) {
                         throw new IllegalArgumentException("Field '" + fieldName + "' cannot be null");
                     }
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                logger.error(e.getMessage());
+            } catch (NoSuchFieldException e) {
+                logger.warn("Field {} does not exist in {} input, skipping...", fieldName, input.getClass().getSimpleName());
+            } catch (IllegalAccessException e) {
+                logger.error("Unable to access field {} in {}", fieldName, entity.getClass().getSimpleName(), e);
+                throw new RuntimeException("Failed to update field: " + fieldName, e);
             }
         }
-        return debrief;
+        return entity;
+    }
+
+    private Object fetchEntities(Field field, Object value) {
+        Class<?> type = findListType(field);
+        if(type == UserRole.class){
+            type = Role.class;
+        }
+        JpaRepository<? extends BaseEntity, String> repository = repositories.get(type);
+
+
+        // @ManyToOne fields cases
+        if (field.isAnnotationPresent(ManyToOne.class) || value instanceof String) {
+            try{
+                return repository.findById((String)value)
+                        .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + value));
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Failed to find entity by ID: " + value, e);
+            }
+        }
+
+        // @OneToMany fields cases
+        if(field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
+            try{
+                List<?> values = (List<?>) value;
+                return values.stream()
+                        .map(id -> repository.findById(id.toString())
+                                .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + id)))
+                        .toList();
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Failed to find entity by ID: " + value, e);
+            }
+        }
+
+        throw new IllegalArgumentException("Unsupported field type or value for field: " + field.getName());
+
     }
 
     private List<Field> getAllFields(Class clazz){
@@ -238,6 +324,23 @@ public class DebriefService {
         }
 
         return methodName.toString();
+    }
+
+    private Class<?> findListType(Field field) {
+        if (List.class.isAssignableFrom(field.getType())) {
+            Type genericType = field.getGenericType();
+
+            // Ensure it's a ParameterizedType (i.e., List<T>)
+            if (genericType instanceof ParameterizedType) {
+                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
+
+                // Get the first generic type argument (T in List<T>)
+                if (actualTypeArguments.length == 1 && actualTypeArguments[0] instanceof Class) {
+                    return (Class<?>) actualTypeArguments[0];
+                }
+            }
+        }
+        return field.getType();
     }
 
 }

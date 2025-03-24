@@ -11,24 +11,24 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ContentItemService {
+public class ContentService {
 
     @Autowired
     private final ParagraphService paragraphService;
 
     // todo: to change the return value
-    public List<ContentItem> CreateContentItem(ContentInput contentItemInput) {
+    public List<ContentItem> createContent(ContentInput contentItemInput, String debriefId) {
         List<ContentItem> contentItems = new ArrayList<>();
         contentItemInput.getParagraphs().forEach(paragraph -> {
-            contentItems.add(paragraphService.createParagraph(paragraph));
+            contentItems.add(paragraphService.createParagraph(paragraph, debriefId));
         });
-//        content.add(contentItemInput.getTables().forEach(table -> {
+//        contentItems.add(contentItemInput.getTables().forEach(table -> {
 //
 //        }));
         return contentItems;
     }
 
-    public List<ContentItem> UpdateContentItem(ContentInput contentItemInput) {
+    public List<ContentItem> updateContent(ContentInput contentItemInput) {
         List<ContentItem> contentItems = new ArrayList<>();
         contentItemInput.getParagraphs().forEach(paragraph -> {
             contentItems.add(paragraphService.updateParagraph(paragraph));
@@ -36,4 +36,5 @@ public class ContentItemService {
 
         return contentItems;
     }
+
 }

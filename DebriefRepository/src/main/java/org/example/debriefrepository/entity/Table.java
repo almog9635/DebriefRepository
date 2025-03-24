@@ -17,9 +17,6 @@ import java.util.List;
 //@jakarta.persistence.Table(name = "\"table\"", schema = "debrief_mgmt")
 public class Table extends ContentItem{
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
     @OneToMany(mappedBy = "table")
     private List<TableColumn> cols = new ArrayList<>();
 
