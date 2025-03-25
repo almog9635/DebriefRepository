@@ -16,7 +16,7 @@ public class ContentService {
     @Autowired
     private final ParagraphService paragraphService;
 
-    // todo: to change the return value
+    // todo: create the table row and column services
     public List<ContentItem> createContent(ContentInput contentItemInput, String debriefId) {
         List<ContentItem> contentItems = new ArrayList<>();
         contentItemInput.getParagraphs().forEach(paragraph -> {

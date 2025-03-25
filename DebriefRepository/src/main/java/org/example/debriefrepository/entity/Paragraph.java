@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @Entity
 @DiscriminatorValue("PARAGRAPH")
-//@Table(name = "paragraph", schema = "debrief_mgmt")
 public class Paragraph extends ContentItem{
 
     @OneToMany(mappedBy = "paragraph")

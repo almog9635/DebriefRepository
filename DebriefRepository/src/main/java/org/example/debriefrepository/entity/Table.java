@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @Entity
 @DiscriminatorValue("TABLE")
-//@jakarta.persistence.Table(name = "\"table\"", schema = "debrief_mgmt")
 public class Table extends ContentItem{
 
     @OneToMany(mappedBy = "table")
