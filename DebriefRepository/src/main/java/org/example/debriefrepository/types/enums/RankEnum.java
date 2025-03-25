@@ -1,6 +1,7 @@
-package org.example.debriefrepository.types;
+package org.example.debriefrepository.types.enums;
 
-public enum Rank {
+/* to put enum in the end */
+public enum RankEnum {
     PRIVATE,
     PRIVATE_FIRST_CLASS,
     CORPORAL,

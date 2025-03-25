@@ -1,10 +1,12 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.debriefrepository.types.Rank;
-import org.example.debriefrepository.types.ServiceType;
+import org.example.debriefrepository.types.enums.RankEnum;
+import org.example.debriefrepository.types.enums.ServiceTypeEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +22,14 @@ public class User extends BaseEntity {
 
     @Column(name = "service_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ServiceType serviceType;
+    private ServiceTypeEnum serviceType;
 
     @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "rank", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Rank rank;
+    private RankEnum rank;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;

@@ -12,10 +12,10 @@ import java.time.ZonedDateTime;
 @Setter
 public class Metadata {
 
-    @Column(name = "creator_id", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "creator_id", nullable = false)
     private String creatorId;
 
-    @Column(name = "modifier_id", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "modifier_id", nullable = false)
     private String modifierId;
 
     @Column(name = "created", nullable = false)

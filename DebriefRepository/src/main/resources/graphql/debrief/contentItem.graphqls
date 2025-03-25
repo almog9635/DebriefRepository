@@ -1,2 +1,12 @@
-union ContentItem  = Table | Comments
+interface ContentItem implements OrderedItem {
+    id: ID!
+    index: Int!
+    name: String!
+}
 
+input ContentInput{
+    paragraphs: [ParagraphInput!]
+    tables: [TableInput!]
+}
+
+union Content = Table | Paragraph

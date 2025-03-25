@@ -1,4 +1,12 @@
-type Row implements OrderItem{
+type Row implements OrderedItem{
+    id: ID!
     index: Int!
-    cells: [String!]!
+    cells: [Cell!]!
+    table: Table!
+}
+
+input RowInput{
+    id: ID
+    index: Int
+    cells: [CellInput!]
 }

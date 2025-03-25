@@ -1,6 +1,8 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.*;
 import org.example.debriefrepository.repository.*;
-import org.example.debriefrepository.types.GroupInput;
+import org.example.debriefrepository.types.input.GroupInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
