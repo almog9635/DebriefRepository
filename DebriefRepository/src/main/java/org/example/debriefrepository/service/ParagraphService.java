@@ -10,6 +10,7 @@ import org.example.debriefrepository.types.content.CommentInput;
 import org.example.debriefrepository.types.content.ParagraphInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class ParagraphService extends OrderedItemService {
+public class ParagraphService {
 
     private final ParagraphRepository paragraphRepository;
 
@@ -28,13 +29,22 @@ public class ParagraphService extends OrderedItemService {
 
     private final DebriefRepository debriefRepository;
 
+    @Autowired
+    private final GenericService<Paragraph, ParagraphInput> genericService;
+
     private final Logger logger = LoggerFactory.getLogger(ParagraphService.class);
 
     public Paragraph createParagraph(ParagraphInput paragraphInput, String debriefId) {
         Paragraph paragraph = new Paragraph();
-        paragraph = setFields(paragraph, paragraphInput, debriefId);
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        skippedFields.add("debrief");
+        skippedFields.add("comments");
+        paragraph = setFields(paragraph, paragraphInput, skippedFields);
 
         try{
+            paragraph.setDebrief(debriefRepository.findById(debriefId)
+                    .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
             paragraphRepository.save(paragraph);
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -65,10 +75,12 @@ public class ParagraphService extends OrderedItemService {
         String paragraphId = paragraphInput.getId();
         Paragraph paragraph = paragraphRepository.findById(paragraphId)
                 .orElseThrow(() -> new IllegalArgumentException("Paragraph not found"));
-
-        paragraph = setFields(paragraph, paragraphInput, "");
-
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        skippedFields.add("comments");
+        paragraph = setFields(paragraph, paragraphInput, skippedFields);
         List<CommentInput> comments = paragraphInput.getComments();
+
         if (Objects.nonNull(comments) && !comments.isEmpty()) {
             List<Comment> updatedComments = new ArrayList<>(paragraph.getComments());
             for (CommentInput commentInput : comments) {
@@ -86,22 +98,9 @@ public class ParagraphService extends OrderedItemService {
         return paragraphRepository.save(paragraph);
     }
 
-    private Paragraph setFields(Paragraph paragraph, ParagraphInput paragraphInput, String debriefId) {
-        paragraph = (Paragraph) super.setFields(paragraph, paragraphInput);
-        try{
-            if(Objects.isNull(paragraphInput.getName())){
-                throw new IllegalArgumentException("Paragraph name is null");
-            }
-            paragraph.setName(paragraphInput.getName());
-            if(Objects.isNull(paragraph.getDebrief())){
-                    paragraph.setDebrief(debriefRepository.findById(debriefId)
-                            .orElseThrow(() -> new IllegalArgumentException("Error creating Debrief")));
-            }
-        } catch (IllegalArgumentException e) {
-        logger.error(e.getMessage());
-        throw new RuntimeException("Error creating paragraph: " + paragraphInput, e);
-    }
-        return paragraph;
+    private Paragraph setFields(Paragraph paragraph, ParagraphInput paragraphInput, List<String> skippedFields) {
+        return genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
+
     }
 
 }
