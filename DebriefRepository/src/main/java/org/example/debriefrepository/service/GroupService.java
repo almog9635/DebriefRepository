@@ -41,6 +41,9 @@ public class GroupService {
     @Autowired
     private final LessonRepository lessonRepository;
 
+    @Autowired
+    private final GenericService<Group, GroupInput> genericService;
+
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> REPOSITORY_MAP;
@@ -145,121 +148,10 @@ public class GroupService {
     /**
      * Uses reflection to map input fields to the Group entity.
      */
-    private Group setFields(Group group, Object input) {
-        List<Field> entityFields = getAllFields(group.getClass());
-
-        for (Field entityField : entityFields) {
-            entityField.setAccessible(true);
-            String fieldName = entityField.getName();
-
-            if ("id".equals(fieldName) || "metaData".equals(fieldName)) continue;
-
-            try {
-                Object value = getFieldValue(input, fieldName);
-
-                if (value != null) {
-                    if (BaseEntity.class.isAssignableFrom(entityField.getType()) ||
-                            BaseEntity.class.isAssignableFrom(findListType(entityField))) {
-                        value = fetchEntities(entityField, value);
-
-                    }
-                    entityField.set(group, value);
-                }else{
-                    Column annotation = entityField.getAnnotation(Column.class);
-                    boolean isNullable = !(Objects.isNull(annotation)) &&  annotation.nullable();
-
-                    if(!isNullable && !Objects.isNull(group.getClass().getField(fieldName))) {
-                        throw new IllegalArgumentException("Field '" + fieldName + "' cannot be null");
-                    }
-                }
-            } catch (NoSuchFieldException e) {
-                logger.warn("Field {} does not exist in User entity, skipping...", fieldName);
-            } catch (IllegalAccessException e) {
-                logger.error("Unable to access field {} in User entity", fieldName, e);
-                throw new RuntimeException("Failed to update user field: " + fieldName, e);
-            }
-        }
-
-        return group;
-    }
-
-    /**
-     * Retrieves the value for a given field name from the input.
-     */
-    private Object getFieldValue(Object input, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-        if (input instanceof Map) {
-            return ((Map<String, Object>) input).get(fieldName);
-        } else {
-            Field inputField = input.getClass().getDeclaredField(fieldName);
-            inputField.setAccessible(true);
-            return inputField.get(input);
-        }
-    }
-
-    /**
-     * Recursively collects all declared fields for a class.
-     */
-    private List<Field> getAllFields(Class<?> clazz) {
-        if (clazz == null) return Collections.emptyList();
-        List<Field> fields = new ArrayList<>(getAllFields(clazz.getSuperclass()));
-        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        return fields;
-    }
-
-    /**
-     * Extracts the generic type argument for a List field.
-     */
-    private Class<?> findListType(Field field) {
-        if (List.class.isAssignableFrom(field.getType())) {
-            Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
-                if (typeArgs.length == 1 && typeArgs[0] instanceof Class) {
-                    return (Class<?>) typeArgs[0];
-                }
-            }
-        }
-        return field.getType();
-    }
-
-    /**
-     * Fetches associated entities from the repository.
-     */
-    private Object fetchEntities(Field field, Object value) {
-        Class<?> type = findListType(field);
-        JpaRepository<? extends BaseEntity, String> repository;
-        if (type.equals(User.class)) {
-            repository = (JpaRepository<? extends BaseEntity, String>) userRepository;
-        } else if (type.equals(Group.class)) {
-            repository = groupRepository;
-        } else {
-            throw new IllegalArgumentException("Unsupported relation type: " + type.getName());
-        }
-
-        // Handle ManyToOne (or simple String ID) case
-        if (field.isAnnotationPresent(ManyToOne.class) || value instanceof String) {
-            try {
-                return repository.findById(value.toString())
-                        .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + value));
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage(), e);
-                throw new RuntimeException("Failed to find entity by ID: " + value, e);
-            }
-        }
-        // Handle OneToMany (or list of IDs)
-        if (field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
-            try {
-                List<?> values = (List<?>) value;
-                return values.stream()
-                        .map(id -> repository.findById(id.toString())
-                                .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + id)))
-                        .collect(Collectors.toList());
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage(), e);
-                throw new RuntimeException("Failed to find entities for value: " + value, e);
-            }
-        }
-        throw new IllegalArgumentException("Unsupported field type or value for field: " + field.getName());
+    private Group setFields(Group group, GroupInput input) {
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        return genericService.setFieldsGeneric(group, input,null, skippedFields);
     }
 
     /**

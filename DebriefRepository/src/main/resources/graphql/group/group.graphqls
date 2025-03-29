@@ -15,7 +15,7 @@ input GroupInput{
 }
 
 input GroupUpdate{
-    id: ID!
+    id: ID
     name: String
     commander: ID
     users: [ID!]

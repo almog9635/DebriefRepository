@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.*;
 import org.example.debriefrepository.repository.*;
 import org.example.debriefrepository.types.content.ContentInput;
+import org.example.debriefrepository.types.content.ParagraphInput;
+import org.example.debriefrepository.types.content.TableInput;
 import org.example.debriefrepository.types.input.DebriefInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,48 +30,22 @@ public class DebriefService {
     private final DebriefRepository debriefRepository;
 
     @Autowired
-    private final UserRepository userRepository;
+    private final ParagraphService paragraphService;
 
     @Autowired
-    private final GroupRepository groupRepository;
-
-    @Autowired
-    private final RoleRepository roleRepository;
-
-    @Autowired
-    private final MissionRepository missionRepository;
-
-    @Autowired
-    private final LessonRepository lessonRepository;
-
-    @Autowired
-    private final ContentService contentService;
+    private GenericService<Debrief, DebriefInput> genericService;
 
     private static final Logger logger = LoggerFactory.getLogger(DebriefService.class);
-
-    private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> repositories;
-
-    @PostConstruct
-    private void init() {
-        repositories = Map.of(
-                User.class, userRepository,
-                Group.class, groupRepository,
-                Role.class, roleRepository,
-                Mission.class, missionRepository,
-                Lesson.class, lessonRepository,
-                Debrief.class, debriefRepository
-        );
-    }
 
     public Debrief createDebrief(DebriefInput input) {
         Debrief debrief = new Debrief();
         try{
-            List<String> skipedFields = new ArrayList<>();
-            skipedFields.add("id");
-            skipedFields.add("contentItems");
-            skipedFields.add("lessons");
-            skipedFields.add("missions");
-            debrief = setFields(debrief, input, skipedFields);
+            List<String> skippedFields = new ArrayList<>();
+            skippedFields.add("id");
+            skippedFields.add("contentItems");
+            skippedFields.add("lessons");
+            skippedFields.add("missions");
+            debrief = setFields(debrief, input, skippedFields);
             debriefRepository.save(debrief);
             setFields(debrief, input, null);
             return debriefRepository.save(debrief);
@@ -169,9 +145,11 @@ public class DebriefService {
             throw new IllegalArgumentException("Debrief ID cannot be null or empty");
         }
         try {
+            List<String> skippedFields = new ArrayList<>();
+            skippedFields.add("id");
             Debrief existingDebrief = debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found with ID: " + debriefId));
-            return debriefRepository.save(setFields(existingDebrief, debriefUpdate, null));
+            return debriefRepository.save(setFields(existingDebrief, debriefUpdate, skippedFields));
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
@@ -186,120 +164,36 @@ public class DebriefService {
     private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skipFields) {
         Map<String, Function<Object, Object>> customProcessors = new HashMap<>();
         customProcessors.put("contentItems", rawValue -> {
-            if (rawValue instanceof ContentInput) {
-                return contentService.createContent((ContentInput) rawValue, debrief.getId());
+            if (rawValue instanceof ContentInput contentInput) {
+                List<ContentItem> items = new ArrayList<>();
+
+                // Process Paragraphs
+                if (contentInput.getParagraphs() != null) {
+                    for (ParagraphInput pInput : contentInput.getParagraphs()) {
+                        if (pInput.getId() == null || pInput.getId().isBlank()) {
+                            items.add(paragraphService.createParagraph(pInput, debrief.getId()));
+                        } else {
+                            items.add(paragraphService.updateParagraph(pInput));
+                        }
+                    }
+                }
+
+                // Process Tables similarly, if applicable
+//                if (contentInput.getTables() != null) {
+//                    for (TableInput tInput : contentInput.getTables()) {
+//                        if (tInput.getId() == null || tInput.getId().isBlank()) {
+//                            items.add(contentService.createTable(tInput, debrief.getId()));
+//                        } else {
+//                            items.add(contentService.updateTable(tInput, debrief.getId()));
+//                        }
+//                    }
+//                }
+                return items;
             }
-            throw new IllegalArgumentException("Invalid value for contentItems field");
+                throw new IllegalArgumentException("Invalid value for contentItems field");
         });
 
-        return setFieldsGeneric(debrief, input, customProcessors, skipFields);
-    }
-
-    private <T, U> T setFieldsGeneric(T entity, U input, Map<String, Function<Object,
-            Object>> customProcessors, List<String> skipFields) {
-        List<Field> fields = getAllFields(entity.getClass());
-        for (Field entityField : fields) {
-            entityField.setAccessible(true);
-            String fieldName = entityField.getName();
-
-            if ("metaData".equals(fieldName) || (Objects.nonNull(skipFields) &&
-                    skipFields.contains(fieldName))) {
-                continue;
-            }
-            try {
-
-                if (customProcessors != null && customProcessors.containsKey(fieldName)) {
-                    Object rawValue = getFieldValue(input, fieldName);
-                    Object processedValue = customProcessors.get(fieldName).apply(rawValue);
-                    entityField.set(entity, processedValue);
-                    continue;
-                }
-
-                Object value = getFieldValue(input, fieldName);
-
-                if (Objects.nonNull(value)) {
-                    if (BaseEntity.class.isAssignableFrom(entityField.getType()) ||
-                            BaseEntity.class.isAssignableFrom(findListType(entityField))) {
-                        value = fetchEntities(entityField, value);
-
-                    }
-                    entityField.set(entity, value);
-                } else {
-
-                    Column annotation = entityField.getAnnotation(Column.class);
-                    boolean isNullable = !(Objects.isNull(annotation)) &&  annotation.nullable();
-
-                    if (!isNullable && Objects.nonNull(entity.getClass().getField(fieldName))) {
-                        throw new IllegalArgumentException("Field '" + fieldName + "' cannot be null");
-                    }
-                }
-            } catch (NoSuchFieldException e) {
-                logger.warn("Field {} does not exist in {} input, skipping...", fieldName, input.getClass().getSimpleName());
-            } catch (IllegalAccessException e) {
-                logger.error("Unable to access field {} in {}", fieldName, entity.getClass().getSimpleName(), e);
-                throw new RuntimeException("Failed to update field: " + fieldName, e);
-            }
-        }
-        return entity;
-    }
-
-    private Object fetchEntities(Field field, Object value) {
-        Class<?> type = findListType(field);
-        if(type == UserRole.class){
-            type = Role.class;
-        }
-        JpaRepository<? extends BaseEntity, String> repository = repositories.get(type);
-
-
-        // @ManyToOne fields cases
-        if (field.isAnnotationPresent(ManyToOne.class) || value instanceof String) {
-            try{
-                return repository.findById((String)value)
-                        .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + value));
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage());
-                throw new RuntimeException("Failed to find entity by ID: " + value, e);
-            }
-        }
-
-        // @OneToMany fields cases
-        if(field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
-            try{
-                List<?> values = (List<?>) value;
-                return values.stream()
-                        .map(id -> repository.findById(id.toString())
-                                .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + id)))
-                        .toList();
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage());
-                throw new RuntimeException("Failed to find entity by ID: " + value, e);
-            }
-        }
-
-        throw new IllegalArgumentException("Unsupported field type or value for field: " + field.getName());
-
-    }
-
-    private List<Field> getAllFields(Class clazz){
-        if (clazz == null) {
-            return Collections.emptyList();
-        }
-
-        List<Field> result = new ArrayList<>(getAllFields(clazz.getSuperclass()));
-        List<Field> filteredFields = Arrays.stream(clazz.getDeclaredFields())
-                .collect(Collectors.toList());
-        result.addAll(filteredFields);
-        return result;
-    }
-
-    private Object getFieldValue(Object input, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-        if (input instanceof Map) {
-            return ((Map<String, Object>) input).get(fieldName); // Get value from Map
-        } else {
-            Field inputField = input.getClass().getDeclaredField(fieldName);
-            inputField.setAccessible(true);
-            return inputField.get(input); // Get value via reflection
-        }
+        return genericService.setFieldsGeneric(debrief, input, customProcessors, skipFields);
     }
 
     /**
@@ -324,23 +218,6 @@ public class DebriefService {
         }
 
         return methodName.toString();
-    }
-
-    private Class<?> findListType(Field field) {
-        if (List.class.isAssignableFrom(field.getType())) {
-            Type genericType = field.getGenericType();
-
-            // Ensure it's a ParameterizedType (i.e., List<T>)
-            if (genericType instanceof ParameterizedType) {
-                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
-
-                // Get the first generic type argument (T in List<T>)
-                if (actualTypeArguments.length == 1 && actualTypeArguments[0] instanceof Class) {
-                    return (Class<?>) actualTypeArguments[0];
-                }
-            }
-        }
-        return field.getType();
     }
 
 }
