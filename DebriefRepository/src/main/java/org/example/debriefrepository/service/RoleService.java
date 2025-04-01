@@ -41,7 +41,7 @@ public class RoleService {
 
     private static final Logger logger = LoggerFactory.getLogger(RoleService.class);
 
-    public Role createUser(RoleInput roleInput) {
+    public Role createRole(RoleInput roleInput) {
         Role role = new Role();
         try{
             return roleRepository.save(setFields(role, roleInput));
