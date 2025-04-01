@@ -37,7 +37,7 @@ public class RoleController {
         Role newRole = null;
         try {
             UserContext.setCurrentUserId(userId);
-            newRole =  roleService.createUser(roleInput);
+            newRole =  roleService.createRole(roleInput);
         }
         finally {
             UserContext.clear();
