@@ -16,7 +16,7 @@ import java.util.List;
 @Table(name = "role", schema = "debrief_mgmt")
 public class Role extends BaseEntity {
 
-    @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "role")

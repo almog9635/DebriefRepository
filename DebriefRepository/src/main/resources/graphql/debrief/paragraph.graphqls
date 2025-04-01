@@ -1,0 +1,27 @@
+type Paragraph implements ContentItem & OrderedItem {
+    id: ID!
+    index: Int!
+    name: String!
+    comments: [Comment!]!
+}
+
+type Comment implements OrderedItem{
+    id: ID!
+    index: Int!
+    bullet : String!
+    paragraph: Paragraph!
+}
+
+input CommentInput {
+    id: ID
+    index: Int
+    bullet: String
+}
+
+input ParagraphInput {
+    id: ID
+    index: Int
+    name: String
+    comments: [CommentInput!]
+}
+

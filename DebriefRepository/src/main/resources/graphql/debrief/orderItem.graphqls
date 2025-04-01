@@ -1,0 +1,4 @@
+interface OrderedItem{
+    id: ID!
+    index: Int!
+}

@@ -1,127 +1,183 @@
 package org.example.debriefrepository.service;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.Group;
-import org.example.debriefrepository.entity.User;
-import org.example.debriefrepository.repository.GroupRepository;
-import org.example.debriefrepository.repository.UserRepository;
-import org.example.debriefrepository.types.GroupInput;
+import org.example.debriefrepository.entity.*;
+import org.example.debriefrepository.repository.*;
+import org.example.debriefrepository.types.input.GroupInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class GroupService {
 
-    private final GroupRepository groupRepository;
+    @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
+    private final GroupRepository groupRepository;
+
+    @Autowired
+    private final RoleRepository roleRepository;
+
+    @Autowired
+    private final TaskRepository taskRepository;
+
+    @Autowired
+    private final DebriefRepository debriefRepository;
+
+    @Autowired
+    private final LessonRepository lessonRepository;
+
+    @Autowired
+    private final GenericService<Group, GroupInput> genericService;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+    private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> REPOSITORY_MAP;
+
+    @PostConstruct
+    private void init() {
+        REPOSITORY_MAP = Map.of(
+                Group.class, groupRepository,
+                Role.class, roleRepository,
+                Task.class, taskRepository,
+                Lesson.class, lessonRepository,
+                Debrief.class, debriefRepository
+        );
+    }
     public List<Group> findAll() {
         return groupRepository.findAll();
     }
 
-    public Group getGroup(Map<String, Object> field) {
-        try {
-            if (field == null || field.isEmpty()) {
-                throw new IllegalArgumentException("The field map is null or empty");
-            }
-
-            if (field.size() > 1) {
-                throw new IllegalArgumentException("The field map contains more than one field");
-            }
-            Map.Entry<String, Object> entry = field.entrySet().iterator().next();
-            String key = entry.getKey();
+    /**
+     * Retrieves a group by filtering on a chosen field.
+     * Iterates over the provided map, dynamically builds a repository method name and invokes it.
+     */
+    public Group getGroup(Map<String, Object> chosenField) {
+        Group group = null;
+        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
+            String fieldName = entry.getKey();
             Object value = entry.getValue();
 
             if (value == null) {
-                throw new IllegalArgumentException("The value for key " + key + " is null");
+                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
             }
-
-            switch (key) {
-                case "id":
-                    return groupRepository.findById(Long.parseLong(value.toString()))
-                            .orElseThrow(() -> new IllegalArgumentException("The group id " + value + " is not found"));
-
-                case "name":
-                    return groupRepository.findByName((String) value);
+            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
             }
-        }catch (IllegalArgumentException e) {
-            System.err.println("Validation Error: " + e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected error occurred", e);
+            Object searchValue = (value instanceof Collection)
+                    ? ((Collection<?>) value).iterator().next()
+                    : value;
+            try {
+                group = findGroupsByField(fieldName, searchValue);
+                if (group == null) {
+                    throw new IllegalArgumentException("The field '" + fieldName + "' is not found.");
+                }
+            } catch (IllegalArgumentException e) {
+                logger.error("Error finding groups by field '{}' with value '{}': {}",
+                        fieldName, searchValue, e.getMessage(), e);
+                throw new RuntimeException("Failed to find groups by field '" + fieldName + "'", e);
+            }
         }
-        return null;
+        return group;
     }
 
-    public Group update(Map<String, Object> input) {
-        try{
-            Group existingGroup = groupRepository.findById((Long)input.get("id"))
-                    .orElse(null);
-            if(existingGroup != null) {
-                for (Map.Entry<String, Object> entry : input.entrySet()) {
-                    String key = entry.getKey();
-                    Object value = entry.getValue();
-                    switch (key) {
-                        case "name":
-                            existingGroup.setName((String) value);
-                            break;
+    /**
+     * Dynamically invokes repository methods (e.g., findByName) to find a group.
+     */
+    private Group findGroupsByField(String fieldName, Object value) {
+        List<Group> groups = new ArrayList<>();
+        for (Method method : groupRepository.getClass().getMethods()) {
+            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
+            try {
+                String methodName = buildMethodName(fieldName, value);
+                if (!method.getName().equals(methodName)) continue;
 
-                        case "commander":
-                            existingGroup.setCommander((userRepository.findById(Long.parseLong(value.toString()))
-                                    .orElse(null)));
-                            break;
-
-                        case "users":
-
-                            break;
-
-                        default:
-                            throw new IllegalArgumentException("Unsupported key: " + key);
-                    }
+                // In case the value is nested in a Map
+                if (value instanceof Map) {
+                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
                 }
-                return existingGroup;
+                Object result = method.invoke(groupRepository, value);
+                if (result instanceof Optional<?>) {
+                    ((Optional<?>) result).ifPresent(g -> groups.add((Group) g));
+                } else if (result instanceof List<?>) {
+                    groups.addAll((List<Group>) result);
+                } else if (result instanceof Group) {
+                    groups.add((Group) result);
+                } else {
+                    logger.error("Unexpected return type: " + result.getClass().getName());
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                logger.error("Error invoking method: " + method.getName(), e);
+                throw new RuntimeException("Error invoking method: " + method.getName(), e);
             }
-            return existingGroup;
-        } catch (Error error){
-            error.printStackTrace();
-            throw new RuntimeException("Unexpected error occurred");
         }
+        return groups.stream().findFirst().orElse(null);
+    }
 
+    @Transactional
+    public Group update(GroupInput input) {
+        try {
+            String groupId = input.id();
+            Group existingGroup = groupRepository.findById(groupId)
+                    .orElseThrow(() -> new IllegalArgumentException("Group not found with ID: " + groupId));
+            return groupRepository.save(setFields(existingGroup, input));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new RuntimeException("Error updating group", e);
+        }
     }
 
     public Group create(GroupInput groupInput) {
+        return groupRepository.save(setFields(new Group(), groupInput));
+    }
 
-        Group group = new Group();
-        group.setName(groupInput.name());
-        group.setCommander(null);
+    /**
+     * Uses reflection to map input fields to the Group entity.
+     */
+    private Group setFields(Group group, GroupInput input) {
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        return genericService.setFieldsGeneric(group, input,null, skippedFields);
+    }
+
+    /**
+     * Builds a repository method name from a field name.
+     */
+    private String buildMethodName(String fieldName, Object value) {
+        StringBuilder methodName = new StringBuilder("findBy");
+        String[] parts = fieldName.split("\\.");
+        for (String part : parts) {
+            methodName.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+        if (value instanceof Map<?, ?> mapValue && !mapValue.isEmpty()) {
+            String nestedKey = mapValue.keySet().iterator().next().toString();
+            methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
+        }
+        return methodName.toString();
+    }
+
+    @Transactional
+    public Boolean deleteById(String id) {
+        if (groupRepository.findById(id).isEmpty())
+            return false;
         try{
-            if(groupInput.commanderId() != null) {
-                User commander = (userRepository.findById(groupInput.commanderId().toString())
-                        .orElse(null));
-                if(commander == null) {
-                    throw new IllegalArgumentException("The commander id " + groupInput.commanderId() + " is not found");
-                }
-                group.setCommander(commander);
-            }
-            return groupRepository.save(group);
-        } catch(Exception e)
-        {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected error occurred");
-        }
-    }
-
-    public Boolean deleteById(Long id) {
-        if(groupRepository.existsById(id)) {
             groupRepository.deleteById(id);
-            return true;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
-    }
 
+        return true;
+    }
 }

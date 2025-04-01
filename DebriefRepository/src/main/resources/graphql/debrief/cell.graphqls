@@ -1,0 +1,13 @@
+type Cell{
+    id: ID!
+    value: String
+    row: Row!
+    column: Col!
+}
+
+input CellInput{
+    id: ID
+    value: String
+    row: ID
+    column: ID
+}

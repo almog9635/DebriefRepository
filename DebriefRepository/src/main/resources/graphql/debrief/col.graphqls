@@ -1,0 +1,14 @@
+type Col implements OrderedItem {
+    id: ID!
+    index: Int!
+    name: String!
+    table: Table!
+    cells: [Cell!]!
+}
+
+input ColInput{
+    id: ID
+    index: Int
+    name: String
+    cell: [CellInput!]
+}

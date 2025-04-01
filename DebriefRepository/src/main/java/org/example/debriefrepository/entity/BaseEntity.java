@@ -1,16 +1,17 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.debriefrepository.listener.MetadataListener;
 
 import java.util.UUID;
 
-@MappedSuperclass
-@EntityListeners(MetadataListener.class)
 @Getter
 @Setter
+@MappedSuperclass
+@EntityListeners(MetadataListener.class)
 public class BaseEntity {
 
     @Id

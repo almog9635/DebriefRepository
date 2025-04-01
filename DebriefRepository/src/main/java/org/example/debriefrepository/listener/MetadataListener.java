@@ -15,9 +15,10 @@ public class MetadataListener {
 
     private static Log log = LogFactory.getLog(MetadataListener.class);
 
-    @PrePersist
+
     @PreUpdate
     @PreRemove
+    @PrePersist
     private void beforeAnyUpdate(Object baseEntity) {
         String userId = UserContext.getCurrentUserId();
         Metadata metadata = ((BaseEntity) baseEntity).getMetaData();

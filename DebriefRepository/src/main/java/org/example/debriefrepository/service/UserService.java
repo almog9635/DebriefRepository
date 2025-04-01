@@ -1,22 +1,21 @@
 package org.example.debriefrepository.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.Group;
-import org.example.debriefrepository.entity.Role;
-import org.example.debriefrepository.entity.User;
-import org.example.debriefrepository.entity.UserRole;
+import org.example.debriefrepository.entity.*;
 import org.example.debriefrepository.repository.*;
-import org.example.debriefrepository.types.UserInput;
+import org.example.debriefrepository.types.input.UserInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,29 +32,41 @@ public class UserService {
     @Autowired
     private final RoleRepository roleRepository;
 
+    @Autowired
+    private final TaskRepository taskRepository;
+
+    @Autowired
+    private final DebriefRepository debriefRepository;
+
+    @Autowired
+    private final LessonRepository lessonRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public User createUser(UserInput userInput) {
-//        for (Field field : userInput.getClass().getDeclaredFields()) {
-//            field.setAccessible(true);
-//            try {
-//                Field entityField = findField(User.class, field.getName())
-//                        .orElseThrow(() -> new IllegalArgumentException("Field " + field.getName() + " not found"));
-//                entityField.setAccessible(true);
-//                Column annotation = entityField.getAnnotation(Column.class);
-//                boolean isNullable = annotation != null && annotation.nullable();
-//
-//                if (field.get(userInput) == null && !field.getName().equals("id") && !isNullable) {
-//                    throw new IllegalArgumentException("Field '" + field.getName() + "' cannot be null");
-//                }
-//            }
-//            catch (IllegalAccessException e) {
-//                throw new IllegalStateException("Error accessing field: " + field.getName(), e);
-//            }
-//        }
+    private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> repositories;
 
-        return userRepository.save(mapToUser(userInput));
+    @PostConstruct
+    private void init() {
+        repositories = Map.of(
+                Group.class, groupRepository,
+                Role.class, roleRepository,
+                Task.class, taskRepository,
+                Lesson.class, lessonRepository,
+                Debrief.class, debriefRepository
+        );
     }
+
+    public User createUser(UserInput userInput) {
+        User user = new User();
+        try{
+            return userRepository.save(setFields(user, userInput));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+        }
+        throw new RuntimeException("Error creating user");
+    }
+
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -86,8 +97,8 @@ public class UserService {
             try {
                 List<User> foundUsers = findUsersByField(fieldName, searchValue);
                 users.addAll(foundUsers);
-            } catch (Exception e) {
-                System.err.println("Error finding users by field '" + fieldName + "' with value '" + searchValue + "': " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
                 throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
             }
         }
@@ -111,9 +122,8 @@ public class UserService {
                 String methodName = buildMethodName(fieldName, value);
                 if (!method.getName().equals(methodName)) continue;
 
-                if(value instanceof  Map)
-                {
-                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue() ;
+                if (value instanceof Map) {
+                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
                 }
                 // Invoke the method dynamically
                 Object result = method.invoke(userRepository, value);
@@ -132,73 +142,138 @@ public class UserService {
         return users;
     }
 
+    @Transactional
     public Boolean deleteById(String id) {
         if (userRepository.findById(id).isEmpty())
             return false;
-        userRepository.deleteById(id);
+        try{
+            userRepository.deleteById(id);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
         return true;
     }
 
-    /* todo: fix graphql update mutation, */
-    public User update(Map<String, Object> userInput) {
-        String userId = (String) userInput.get("id");
+    public User update(UserInput userInput) {
+        String userId = userInput.id();
         if (userId == null || userId.trim().isEmpty()) {
             throw new IllegalArgumentException("User ID cannot be null or empty");
         }
-
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-
-        userInput.forEach((fieldName, value) -> {
-            if (!fieldName.equals("id")) { // Prevent updating ID
-                try {
-                    Field field = User.class.getDeclaredField(fieldName);
-                    if(Objects.isNull(field)) {
-                        throw new IllegalArgumentException("The field " + fieldName + " is null or empty");
-                    }
-                    field.setAccessible(true);
-
-                    Column annotation = field.getAnnotation(Column.class);
-                    boolean isNullable = annotation != null && annotation.nullable();
-
-                    if (!isNullable && Objects.isNull(value)) {
-                        throw new IllegalArgumentException("The field " + fieldName + " cannot be null");
-                    }
-
-                    field.set(existingUser, value);
-                } catch (NoSuchFieldException e) {
-                    logger.warn("Field {} does not exist in User entity, skipping...", fieldName);
-                } catch (IllegalAccessException e) {
-                    logger.error("Unable to access field {} in User entity", fieldName, e);
-                    throw new RuntimeException("Failed to update user field: " + fieldName, e);
-                }
-            }
-        });
-
-        return userRepository.save(existingUser);
+        try {
+            User existingUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+            return userRepository.save(setFields(existingUser, userInput));
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+        }
+        throw new RuntimeException("Error modifying user");
     }
 
-    private User mapToUser(UserInput input) {
-        User user = new User();
-        user.setFirstName(input.firstName());
-        user.setLastName(input.lastName());
-        user.setPassword(input.password());
-        user.setServiceType(input.serviceType());
-        user.setRank(input.rank());
-        List<UserRole> userRoles = input.roles().stream()
-                .map(roleInput -> {
-                    Role role = roleRepository.findByName(roleInput.name());
-                    UserRole userRole = new UserRole();
-                    userRole.setUser(user);
-                    userRole.setRole(role);
+    private User setFields(User user, Object input) {
+        List<Field> entityFields = getAllFields(user.getClass());
 
-                    return userRole;
-                })
-                .toList();
-        Group group = groupRepository.findByName(input.group());
-        user.setGroup(group);
-        user.setRoles(userRoles);
+        for (Field entityField : entityFields) {
+            entityField.setAccessible(true);
+            String fieldName = entityField.getName();
+
+            if ("id".equals(fieldName) || "metaData".equals(fieldName)) continue;
+
+            try {
+                Object value = getFieldValue(input, fieldName);
+
+                if (value != null) {
+                    if (BaseEntity.class.isAssignableFrom(entityField.getType()) ||
+                            BaseEntity.class.isAssignableFrom(findListType(entityField))) {
+                        value = fetchEntities(entityField, value);
+
+                        /* ask chanan if there is a better way */
+                        if(entityField.getName().equals("roles")){
+                            user.getRoles().clear();
+                            List<UserRole> newRoles = ((List<Role>)value).stream()
+                                    .map(role -> {
+                                        UserRole userRole = new UserRole();
+                                        userRole.setRole(role);
+                                        userRole.setUser(user);
+
+                                        return userRole;
+                                    })
+                                    .collect(Collectors.toCollection(ArrayList::new));
+                            user.getRoles().addAll(newRoles);
+                            continue;
+                        }
+                    }
+
+                    entityField.set(user, value);
+                }else{
+                    Column annotation = entityField.getAnnotation(Column.class);
+                    boolean isNullable = !(Objects.isNull(annotation)) &&  annotation.nullable();
+
+                    if(!isNullable && !Objects.isNull(user.getClass().getField(fieldName))) {
+                        throw new IllegalArgumentException("Field '" + fieldName + "' cannot be null");
+                    }
+                }
+            } catch (NoSuchFieldException e) {
+                logger.warn("Field {} does not exist in User entity, skipping...", fieldName);
+            } catch (IllegalAccessException e) {
+                logger.error("Unable to access field {} in User entity", fieldName, e);
+                throw new RuntimeException("Failed to update user field: " + fieldName, e);
+            }
+        }
+
         return user;
+    }
+
+    /**
+     * returns the value of the id from the database and checks if it exists
+     */
+    private Object fetchEntities(Field field, Object value) {
+        Class<?> type = findListType(field);
+        if(type == UserRole.class){
+            type = Role.class;
+        }
+        JpaRepository<? extends BaseEntity, String> repository = repositories.get(type);
+
+
+        // @ManyToOne fields cases
+        if (field.isAnnotationPresent(ManyToOne.class) || value instanceof String) {
+            try{
+                return repository.findById((String)value)
+                        .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + value));
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Failed to find entity by ID: " + value, e);
+            }
+        }
+
+        // @OneToMany fields cases
+        if(field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
+            try{
+                List<?> values = (List<?>) value;
+                return values.stream()
+                        .map(id -> repository.findById(id.toString())
+                                .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + id)))
+                        .toList();
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Failed to find entity by ID: " + value, e);
+            }
+        }
+
+        throw new IllegalArgumentException("Unsupported field type or value for field: " + field.getName());
+
+    }
+
+    private Object getFieldValue(Object input, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+        if (input instanceof Map) {
+            return ((Map<String, Object>) input).get(fieldName); // Get value from Map
+        } else {
+            Field inputField = input.getClass().getDeclaredField(fieldName);
+            inputField.setAccessible(true);
+            return inputField.get(input); // Get value via reflection
+        }
     }
 
     /**
@@ -225,27 +300,36 @@ public class UserService {
         return methodName.toString();
     }
 
-    private List<Field> getAllFields(Class clazz) {
+    private List<Field> getAllFields(Class clazz){
         if (clazz == null) {
             return Collections.emptyList();
         }
 
         List<Field> result = new ArrayList<>(getAllFields(clazz.getSuperclass()));
         List<Field> filteredFields = Arrays.stream(clazz.getDeclaredFields())
-                .filter(f -> Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))
                 .collect(Collectors.toList());
         result.addAll(filteredFields);
         return result;
     }
 
-    private Optional<Field> findField(Class<?> clazz, String fieldName) {
-        if (clazz == null || fieldName == null || fieldName.isEmpty()) {
-            return Optional.empty();
-        }
+    /**
+     * finds the type that list is made of
+     */
+    private Class<?> findListType(Field field) {
+        if (List.class.isAssignableFrom(field.getType())) {
+            Type genericType = field.getGenericType();
 
-        return getAllFields(clazz).stream()
-                .filter(field -> field.getName().equals(fieldName))
-                .findFirst();
+            // Ensure it's a ParameterizedType (i.e., List<T>)
+            if (genericType instanceof ParameterizedType) {
+                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
+
+                // Get the first generic type argument (T in List<T>)
+                if (actualTypeArguments.length == 1 && actualTypeArguments[0] instanceof Class) {
+                    return (Class<?>) actualTypeArguments[0];
+                }
+            }
+        }
+        return field.getType();
     }
 
 }

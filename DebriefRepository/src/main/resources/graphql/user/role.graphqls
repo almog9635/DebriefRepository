@@ -4,5 +4,11 @@ type Role{
 }
 
 input RoleInput{
+    id: ID!
+    name: String
+}
+
+input RoleUpdate{
+    id: ID
     name: String!
 }

@@ -29,3 +29,8 @@
         MAJOR_GENERAL
         CHIEF_OF_STAFF
     }
+
+    enum ContentType{
+        TABLE
+        PARAGRAPH
+    }

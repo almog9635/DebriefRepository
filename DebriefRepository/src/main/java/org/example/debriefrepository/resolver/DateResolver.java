@@ -72,8 +72,9 @@ public class DateResolver {
 
                 @Override
                 public ZonedDateTime parseLiteral(Object input) {
-                    if (input instanceof String) {
-                        return ZonedDateTime.parse((String) input, formatter);
+                    if (input instanceof graphql.language.StringValue) {
+                        String value = ((graphql.language.StringValue) input).getValue();
+                        return ZonedDateTime.parse(value, formatter);
                     }
                     throw new IllegalArgumentException("ZonedDateTime scalar can only parse literals of type String.");
                 }

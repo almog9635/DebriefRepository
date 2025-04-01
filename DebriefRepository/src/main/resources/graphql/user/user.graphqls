@@ -8,7 +8,7 @@ type User{
     group: Group!
     rank: RankEnum!
     debriefs: [Debrief!]
-    missions: [Mission!]
+    tasks: [Task!]
 }
 
 input UserInput{
@@ -21,7 +21,7 @@ input UserInput{
     rank : RankEnum
     group: GroupInput
     debriefs: DebriefInput
-    missions: MissionInput
+    tasks: TaskInput
 
 }
 
@@ -30,7 +30,7 @@ input UserUpdate{
     firstName: String
     lastName: String
     password: String
-    roles: [RoleInput!]
+    roles: [ID!]
     serviceType: ServiceTypeEnum
     rank: RankEnum
     group: String
