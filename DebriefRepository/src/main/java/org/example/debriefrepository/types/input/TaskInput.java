@@ -7,7 +7,7 @@ public record TaskInput(
         String content,
         ZonedDateTime startDate,
         ZonedDateTime deadline,
-        String debriefId,
+        String debrief,
         String user,
-        String lessonId) {
+        String lesson) {
 }

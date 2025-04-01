@@ -12,5 +12,5 @@ public record DebriefInput(
         String user,
         String group,
         List<LessonInput> lessons,
-        List<TaskInput> missions) {
+        List<TaskInput> tasks) {
 }

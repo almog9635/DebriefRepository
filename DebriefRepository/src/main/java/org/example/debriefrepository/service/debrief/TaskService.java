@@ -56,7 +56,7 @@ public class TaskService {
         String id = taskInput.id();
         try{
             Task existingTask = taskRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("debrief not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("task not found"));
             genericService.setFieldsGeneric(existingTask,taskInput,null,null);
             return taskRepository.save(existingTask);
         } catch (Exception e){

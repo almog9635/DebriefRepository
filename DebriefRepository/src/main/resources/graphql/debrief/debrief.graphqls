@@ -24,6 +24,6 @@ input DebriefUpdate{
     date: ZonedDateTime
     user: ID
     group: String
-    lessons: [ID!]
-    missions: [ID!]
+    lessons: [LessonInput!]
+    tasks: [TaskInput!]
 }

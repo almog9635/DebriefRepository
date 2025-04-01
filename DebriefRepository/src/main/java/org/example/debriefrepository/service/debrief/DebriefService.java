@@ -3,6 +3,8 @@ package org.example.debriefrepository.service.debrief;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.ContentItem;
 import org.example.debriefrepository.entity.Debrief;
+import org.example.debriefrepository.entity.Lesson;
+import org.example.debriefrepository.entity.Task;
 import org.example.debriefrepository.repository.DebriefRepository;
 import org.example.debriefrepository.service.GenericService;
 import org.example.debriefrepository.service.contentItem.paragraph.ParagraphService;
@@ -11,6 +13,8 @@ import org.example.debriefrepository.types.content.ContentInput;
 import org.example.debriefrepository.types.content.ParagraphInput;
 import org.example.debriefrepository.types.content.TableInput;
 import org.example.debriefrepository.types.input.DebriefInput;
+import org.example.debriefrepository.types.input.LessonInput;
+import org.example.debriefrepository.types.input.TaskInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +36,13 @@ public class DebriefService {
     private final ParagraphService paragraphService;
 
     @Autowired
+    private final LessonService lessonService;
+
+    @Autowired
     private final TableService tableService;
+
+    @Autowired
+    private final TaskService taskService;
 
     @Autowired
     private GenericService<Debrief, DebriefInput> genericService;
@@ -46,7 +56,7 @@ public class DebriefService {
             skippedFields.add("id");
             skippedFields.add("contentItems");
             skippedFields.add("lessons");
-            skippedFields.add("missions");
+            skippedFields.add("tasks");
             debrief = setFields(debrief, input, skippedFields);
             debriefRepository.save(debrief);
             setFields(debrief, input, null);
@@ -159,10 +169,7 @@ public class DebriefService {
         throw new RuntimeException("Error modifying user");
     }
 
-    /*
-        todo: define a const map of function of types that does not exist before the creation of the debrief
-        such as contentItem or mission
-     */
+
     private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skippFields) {
         Map<String, Function<Object, Object>> customProcessors = new HashMap<>();
         customProcessors.put("contentItems", rawValue -> {
@@ -193,6 +200,36 @@ public class DebriefService {
                 return items;
             }
                 throw new IllegalArgumentException("Invalid value for contentItems field");
+        });
+
+        customProcessors.put("tasks", value -> {
+            if(!((List<TaskInput>)value).isEmpty()){
+                List<Task> tasks = new ArrayList<>();
+                for (TaskInput taskInput : ((List<TaskInput>)value)) {
+                    if(Objects.isNull(taskInput.id()) || taskInput.id().isBlank()){
+                        tasks.add(taskService.createTask(taskInput, debrief.getId(), null));
+                    } else {
+                        tasks.add(taskService.updateTask(taskInput));
+                    }
+                }
+                return tasks;
+            }
+            throw new IllegalArgumentException("Invalid value for tasks field");
+        });
+
+        customProcessors.put("lessons", value ->{
+            if(!((List<LessonInput>)value).isEmpty()){
+                List<Lesson> lessons = new ArrayList<>();
+                for (LessonInput lessonInput : ((List<LessonInput>)value)) {
+                    if(Objects.isNull(lessonInput.id()) || lessonInput.id().isBlank()){
+                        lessons.add(lessonService.createLesson(lessonInput, debrief.getId()));
+                    } else {
+                        lessons.add(lessonService.updateLesson(lessonInput));
+                    }
+                }
+                return lessons;
+            }
+            throw new IllegalArgumentException("Invalid value for lessons field");
         });
 
         return genericService.setFieldsGeneric(debrief, input, customProcessors, skippFields);

@@ -86,6 +86,7 @@ public class TableService {
         throw new RuntimeException("rows or cols can not be empty: " + input);
     }
 
+    /* todo: change the function that rows or cols can be null */
     public Table updateTable(TableInput input) {
         String id = input.getId();
         Table existingTable = tableRepository.findById(id)
