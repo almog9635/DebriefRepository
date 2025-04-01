@@ -2,18 +2,18 @@ type Lesson{
     id: ID!
     content: String!
     debrief: Debrief!
-    missions: [Mission!]!
+    tasks: [Task!]!
 }
 
 input LessonInput{
     id: ID
     content: String
     debrief: DebriefInput
-    missions: [MissionInput!]
+    tasks: [TaskInput!]
 }
 
 input LessonUpdate{
     content: String!
     debrief : ID!
-    Mission: [ID!]!
+    tasks: [ID!]!
 }

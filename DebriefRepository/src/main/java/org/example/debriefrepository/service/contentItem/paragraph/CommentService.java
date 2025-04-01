@@ -1,10 +1,10 @@
-package org.example.debriefrepository.service;
+package org.example.debriefrepository.service.contentItem.paragraph;
 
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Comment;
-import org.example.debriefrepository.entity.Paragraph;
 import org.example.debriefrepository.repository.CommentRepository;
 import org.example.debriefrepository.repository.ParagraphRepository;
+import org.example.debriefrepository.service.GenericService;
 import org.example.debriefrepository.types.content.CommentInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +29,11 @@ public class CommentService {
 
     public Comment createComment(CommentInput input, String paragraphId) {
         Comment comment = new Comment();
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        skippedFields.add("paragraph");
+        comment = setFields(comment, input, skippedFields);
         try {
-            List<String> skippedFields = new ArrayList<>();
-            skippedFields.add("id");
-            skippedFields.add("paragraph");
-            comment = setFields(comment, input, skippedFields);
             comment.setParagraph(paragraphRepository.findById(paragraphId).
                     orElseThrow(() -> new IllegalArgumentException("Invalid paragraph id: " + paragraphId)));
             return commentRepository.save(comment);
@@ -47,10 +47,16 @@ public class CommentService {
         String id = input.getId();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        comment = setFields(comment, input, skippedFields);
-        return commentRepository.save(comment);
+        try{
+            Comment comment = commentRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+            comment = setFields(comment, input, skippedFields);
+            return commentRepository.save(comment);
+        } catch (Exception e) {
+            logger.error("Error updating comment: {}", e.getMessage(), e);
+            throw new RuntimeException("Error updating comment", e);
+        }
+
     }
 
     protected Comment setFields(Comment comment, CommentInput input, List<String> skippedFields) {

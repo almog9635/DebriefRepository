@@ -11,8 +11,8 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "mission", schema = "debrief_mgmt")
-public class Mission extends BaseEntity {
+@Table(name = "task", schema = "debrief_mgmt")
+public class Task extends BaseEntity {
 
     @Column(name = "content", nullable = false)
     private String content;

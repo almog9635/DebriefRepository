@@ -3,7 +3,7 @@ package org.example.debriefrepository.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.Debrief;
-import org.example.debriefrepository.service.DebriefService;
+import org.example.debriefrepository.service.debrief.DebriefService;
 import org.example.debriefrepository.types.input.DebriefInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;

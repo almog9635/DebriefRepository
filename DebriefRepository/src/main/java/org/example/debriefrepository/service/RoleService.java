@@ -1,23 +1,18 @@
 package org.example.debriefrepository.service;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.*;
+import org.example.debriefrepository.entity.Role;
 import org.example.debriefrepository.repository.*;
 import org.example.debriefrepository.types.input.RoleInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +28,7 @@ public class RoleService {
     private final RoleRepository roleRepository;
 
     @Autowired
-    private final MissionRepository missionRepository;
+    private final TaskRepository taskRepository;
 
     @Autowired
     private final DebriefRepository debriefRepository;

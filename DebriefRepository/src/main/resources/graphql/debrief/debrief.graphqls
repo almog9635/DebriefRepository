@@ -5,7 +5,7 @@ type Debrief{
     user: User!
     group: Group!
     lessons: [Lesson!]
-    missions: [Mission!]!
+    tasks: [Task!]!
 }
 
 input DebriefInput{
@@ -15,7 +15,7 @@ input DebriefInput{
     user: ID
     group: GroupInput
     lesson: LessonInput
-    mission: MissionInput
+    tasks: TaskInput
 }
 
 input DebriefUpdate{

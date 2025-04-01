@@ -33,7 +33,7 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     @Autowired
-    private final MissionRepository missionRepository;
+    private final TaskRepository taskRepository;
 
     @Autowired
     private final DebriefRepository debriefRepository;
@@ -50,7 +50,7 @@ public class UserService {
         repositories = Map.of(
                 Group.class, groupRepository,
                 Role.class, roleRepository,
-                Mission.class, missionRepository,
+                Task.class, taskRepository,
                 Lesson.class, lessonRepository,
                 Debrief.class, debriefRepository
         );

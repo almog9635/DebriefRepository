@@ -6,5 +6,5 @@ public record LessonInput(
         String id,
         String content,
         String debriefId,
-        List<String> missions) {
+        List<TaskInput> tasks) {
 }
