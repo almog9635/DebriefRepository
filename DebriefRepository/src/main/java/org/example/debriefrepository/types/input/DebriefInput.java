@@ -11,6 +11,6 @@ public record DebriefInput(
         ZonedDateTime date,
         String user,
         String group,
-        List<String> lessons,
-        List<String> missions) {
+        List<LessonInput> lessons,
+        List<TaskInput> tasks) {
 }

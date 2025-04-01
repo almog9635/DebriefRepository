@@ -23,6 +23,6 @@ public class Lesson extends BaseEntity {
     private Debrief debrief;
 
     @OneToMany(mappedBy = "lesson")
-    private List<Mission> missions = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
 }

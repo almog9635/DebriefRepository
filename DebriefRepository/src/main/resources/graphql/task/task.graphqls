@@ -1,4 +1,4 @@
-type Mission{
+type Task{
     id: ID!
     content: String!
     startDate: ZonedDateTime!
@@ -8,21 +8,12 @@ type Mission{
     lesson: Lesson
 }
 
-input MissionInput{
+input TaskInput{
     id: ID
     content: String
     startDate: ZonedDateTime
     deadline: ZonedDateTime
-    user: UserInput
-    debrief: DebriefInput
-    lesson: LessonInput
-}
-
-input MissionUpdate{
-    content: String!
-    startDate: ZonedDateTime!
-    deadline: ZonedDateTime!
-    user: ID!
-    debrief: ID!
+    user: ID
+    debrief: ID
     lesson: ID
 }

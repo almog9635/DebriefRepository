@@ -34,6 +34,6 @@ public class Debrief extends BaseEntity{
     private List<Lesson> lessons = new ArrayList<>();
 
     @OneToMany(mappedBy = "debrief")
-    private List<Mission> missions = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
 }

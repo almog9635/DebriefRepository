@@ -11,6 +11,7 @@ public class CellInput {
 
     private String id;
     private String value;
-    private String colId;
+    private String column;
+    private String row;
 
 }

@@ -45,7 +45,7 @@ public class User extends BaseEntity {
     private List<Group> groups = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Mission> missions = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> roles = new ArrayList<>();

@@ -2,12 +2,12 @@ package org.example.debriefrepository.types.input;
 
 import java.time.ZonedDateTime;
 
-public record MissionInput(
+public record TaskInput(
         String id,
         String content,
         ZonedDateTime startDate,
         ZonedDateTime deadline,
-        String debriefId,
+        String debrief,
         String user,
-        String lessonId) {
+        String lesson) {
 }

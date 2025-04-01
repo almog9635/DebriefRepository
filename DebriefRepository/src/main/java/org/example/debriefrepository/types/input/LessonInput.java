@@ -5,6 +5,6 @@ import java.util.List;
 public record LessonInput(
         String id,
         String content,
-        String debriefId,
-        List<String> missions) {
+        String debrief,
+        List<TaskInput> tasks) {
 }

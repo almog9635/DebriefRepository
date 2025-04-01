@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TableInput extends ContentItem {
 
-    List<ColumnInput> cols;
+    List<ColumnInput> columns;
     List<RowInput> rows;
 
 }

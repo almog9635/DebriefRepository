@@ -9,7 +9,6 @@ import org.example.debriefrepository.entity.*;
 import org.example.debriefrepository.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -32,29 +31,41 @@ public class GenericService <T extends BaseEntity, U>{
     
     private final RoleRepository roleRepository;
     
-    private final MissionRepository missionRepository;
+    private final TaskRepository taskRepository;
     
     private final LessonRepository lessonRepository;
 
     private final CommentRepository commentRepository;
 
     private final ParagraphRepository paragraphRepository;
-    
+
+    private final TableRepository tableRepository;
+
+    private final RowRepository rowRepository;
+
+    private final TableColumnRepository tableColumnRepository;
+
+    private final CellRepository cellRepository;
+
     private final Logger logger = LoggerFactory.getLogger(GenericService.class);
 
     private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> repositories;
 
     @PostConstruct
     private void init() {
-        repositories = Map.of(
-                User.class, userRepository,
-                Group.class, groupRepository,
-                Role.class, roleRepository,
-                Mission.class, missionRepository,
-                Lesson.class, lessonRepository,
-                Debrief.class, debriefRepository,
-                Comment.class, commentRepository,
-                Paragraph.class, paragraphRepository
+        repositories = Map.ofEntries(
+                Map.entry(User.class, userRepository),
+                Map.entry(Group.class, groupRepository),
+                Map.entry(Role.class, roleRepository),
+                Map.entry(Task.class, taskRepository),
+                Map.entry(Lesson.class, lessonRepository),
+                Map.entry(Debrief.class, debriefRepository),
+                Map.entry(Comment.class, commentRepository),
+                Map.entry(Paragraph.class, paragraphRepository),
+                Map.entry(Table.class, tableRepository),
+                Map.entry(Row.class, rowRepository),
+                Map.entry(TableColumn.class, tableColumnRepository),
+                Map.entry(Cell.class, cellRepository)
         );
     }
     

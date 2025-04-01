@@ -1,26 +1,29 @@
-package org.example.debriefrepository.service;
+package org.example.debriefrepository.service.debrief;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.*;
-import org.example.debriefrepository.repository.*;
+import org.example.debriefrepository.entity.ContentItem;
+import org.example.debriefrepository.entity.Debrief;
+import org.example.debriefrepository.entity.Lesson;
+import org.example.debriefrepository.entity.Task;
+import org.example.debriefrepository.repository.DebriefRepository;
+import org.example.debriefrepository.service.GenericService;
+import org.example.debriefrepository.service.contentItem.paragraph.ParagraphService;
+import org.example.debriefrepository.service.contentItem.table.TableService;
 import org.example.debriefrepository.types.content.ContentInput;
 import org.example.debriefrepository.types.content.ParagraphInput;
 import org.example.debriefrepository.types.content.TableInput;
 import org.example.debriefrepository.types.input.DebriefInput;
+import org.example.debriefrepository.types.input.LessonInput;
+import org.example.debriefrepository.types.input.TaskInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,15 @@ public class DebriefService {
 
     @Autowired
     private final ParagraphService paragraphService;
+
+    @Autowired
+    private final LessonService lessonService;
+
+    @Autowired
+    private final TableService tableService;
+
+    @Autowired
+    private final TaskService taskService;
 
     @Autowired
     private GenericService<Debrief, DebriefInput> genericService;
@@ -44,7 +56,7 @@ public class DebriefService {
             skippedFields.add("id");
             skippedFields.add("contentItems");
             skippedFields.add("lessons");
-            skippedFields.add("missions");
+            skippedFields.add("tasks");
             debrief = setFields(debrief, input, skippedFields);
             debriefRepository.save(debrief);
             setFields(debrief, input, null);
@@ -157,20 +169,17 @@ public class DebriefService {
         throw new RuntimeException("Error modifying user");
     }
 
-    /*
-        todo: define a const map of function of types that does not exist before the creation of the debrief
-        such as contentItem or mission
-     */
-    private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skipFields) {
+
+    private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skippFields) {
         Map<String, Function<Object, Object>> customProcessors = new HashMap<>();
         customProcessors.put("contentItems", rawValue -> {
             if (rawValue instanceof ContentInput contentInput) {
                 List<ContentItem> items = new ArrayList<>();
 
                 // Process Paragraphs
-                if (contentInput.getParagraphs() != null) {
+                if (Objects.nonNull(contentInput.getParagraphs())) {
                     for (ParagraphInput pInput : contentInput.getParagraphs()) {
-                        if (pInput.getId() == null || pInput.getId().isBlank()) {
+                        if (Objects.isNull(pInput.getId()) || pInput.getId().isBlank()) {
                             items.add(paragraphService.createParagraph(pInput, debrief.getId()));
                         } else {
                             items.add(paragraphService.updateParagraph(pInput));
@@ -179,21 +188,51 @@ public class DebriefService {
                 }
 
                 // Process Tables similarly, if applicable
-//                if (contentInput.getTables() != null) {
-//                    for (TableInput tInput : contentInput.getTables()) {
-//                        if (tInput.getId() == null || tInput.getId().isBlank()) {
-//                            items.add(contentService.createTable(tInput, debrief.getId()));
-//                        } else {
-//                            items.add(contentService.updateTable(tInput, debrief.getId()));
-//                        }
-//                    }
-//                }
+                if (Objects.nonNull(contentInput.getTables())) {
+                    for (TableInput tInput : contentInput.getTables()) {
+                        if (Objects.isNull(tInput.getId()) || tInput.getId().isBlank()) {
+                            items.add(tableService.createTable(tInput, debrief.getId()));
+                        } else {
+                            items.add(tableService.updateTable(tInput));
+                        }
+                    }
+                }
                 return items;
             }
                 throw new IllegalArgumentException("Invalid value for contentItems field");
         });
 
-        return genericService.setFieldsGeneric(debrief, input, customProcessors, skipFields);
+        customProcessors.put("tasks", value -> {
+            if(!((List<TaskInput>)value).isEmpty()){
+                List<Task> tasks = new ArrayList<>();
+                for (TaskInput taskInput : ((List<TaskInput>)value)) {
+                    if(Objects.isNull(taskInput.id()) || taskInput.id().isBlank()){
+                        tasks.add(taskService.createTask(taskInput, debrief.getId(), null));
+                    } else {
+                        tasks.add(taskService.updateTask(taskInput));
+                    }
+                }
+                return tasks;
+            }
+            throw new IllegalArgumentException("Invalid value for tasks field");
+        });
+
+        customProcessors.put("lessons", value ->{
+            if(!((List<LessonInput>)value).isEmpty()){
+                List<Lesson> lessons = new ArrayList<>();
+                for (LessonInput lessonInput : ((List<LessonInput>)value)) {
+                    if(Objects.isNull(lessonInput.id()) || lessonInput.id().isBlank()){
+                        lessons.add(lessonService.createLesson(lessonInput, debrief.getId()));
+                    } else {
+                        lessons.add(lessonService.updateLesson(lessonInput));
+                    }
+                }
+                return lessons;
+            }
+            throw new IllegalArgumentException("Invalid value for lessons field");
+        });
+
+        return genericService.setFieldsGeneric(debrief, input, customProcessors, skippFields);
     }
 
     /**

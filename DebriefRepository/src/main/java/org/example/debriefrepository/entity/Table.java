@@ -1,6 +1,5 @@
 package org.example.debriefrepository.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -17,7 +16,7 @@ import java.util.List;
 public class Table extends ContentItem{
 
     @OneToMany(mappedBy = "table")
-    private List<TableColumn> cols = new ArrayList<>();
+    private List<TableColumn> columns = new ArrayList<>();
 
     @OneToMany(mappedBy = "table")
     private List<Row> rows = new ArrayList<>();

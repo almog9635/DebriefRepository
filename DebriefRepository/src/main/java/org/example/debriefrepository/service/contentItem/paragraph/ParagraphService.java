@@ -1,4 +1,4 @@
-package org.example.debriefrepository.service;
+package org.example.debriefrepository.service.contentItem.paragraph;
 
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.entity.Comment;
@@ -6,6 +6,7 @@ import org.example.debriefrepository.entity.Paragraph;
 import org.example.debriefrepository.repository.CommentRepository;
 import org.example.debriefrepository.repository.DebriefRepository;
 import org.example.debriefrepository.repository.ParagraphRepository;
+import org.example.debriefrepository.service.GenericService;
 import org.example.debriefrepository.types.content.CommentInput;
 import org.example.debriefrepository.types.content.ParagraphInput;
 import org.slf4j.Logger;
@@ -34,13 +35,14 @@ public class ParagraphService {
 
     private final Logger logger = LoggerFactory.getLogger(ParagraphService.class);
 
+    /* to ask chanan if is it better to set the paragraph input id instead of fetching it manually */
     public Paragraph createParagraph(ParagraphInput paragraphInput, String debriefId) {
         Paragraph paragraph = new Paragraph();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("comments");
-        paragraph = setFields(paragraph, paragraphInput, skippedFields);
+        paragraph = genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
 
         try{
             paragraph.setDebrief(debriefRepository.findById(debriefId)
@@ -52,7 +54,7 @@ public class ParagraphService {
         }
 
         List<CommentInput> comments = paragraphInput.getComments();
-        if (comments != null && !comments.isEmpty()) {
+        if (Objects.nonNull(comments) && !comments.isEmpty()) {
             List<Comment> savedComments = new ArrayList<>();
             for (CommentInput commentInput : comments) {
                 Comment comment = commentService.createComment(commentInput, paragraph.getId());
@@ -66,7 +68,6 @@ public class ParagraphService {
                 logger.error(e.getMessage());
                 throw new RuntimeException("Error creating paragraph: " + paragraphInput, e);
             }
-
         }
         return paragraph;
     }
@@ -78,7 +79,7 @@ public class ParagraphService {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
         skippedFields.add("comments");
-        paragraph = setFields(paragraph, paragraphInput, skippedFields);
+        paragraph = genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
         List<CommentInput> comments = paragraphInput.getComments();
 
         if (Objects.nonNull(comments) && !comments.isEmpty()) {
@@ -87,20 +88,20 @@ public class ParagraphService {
                 Comment existingComment = commentRepository.findById(commentInput.getId())
                         .orElse(null);
                 if (Objects.nonNull(existingComment)) {
-                    existingComment = commentService.updateComment(commentInput);
+                    updatedComments.add(commentService.updateComment(commentInput));
                 } else{
-                    existingComment = commentService.createComment(commentInput, paragraph.getId());
+                    updatedComments.add(commentService.createComment(commentInput, paragraph.getId()));
                 }
-                updatedComments.add(existingComment);
             }
             paragraph.setComments(updatedComments);
+            try{
+                paragraph = paragraphRepository.save(paragraph);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Error creating paragraph: " + paragraphInput, e);
+            }
         }
-        return paragraphRepository.save(paragraph);
-    }
-
-    private Paragraph setFields(Paragraph paragraph, ParagraphInput paragraphInput, List<String> skippedFields) {
-        return genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
-
+        return paragraph;
     }
 
 }
