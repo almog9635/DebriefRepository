@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "\"group\"", schema = "debrief_mgmt")
+@Table(name = "group", schema = "debrief_mgmt")
 public class Group extends BaseEntity {
 
     @Column(name = "name", nullable = false)

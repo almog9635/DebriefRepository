@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @Entity
 @DiscriminatorValue("PARAGRAPH")
-public class Paragraph extends ContentItem{
+public class Paragraph extends ContentItem {
 
     @OneToMany(mappedBy = "paragraph")
     private List<Comment> comments = new ArrayList<>();

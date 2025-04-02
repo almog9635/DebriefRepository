@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "cell", schema = "debrief_mgmt")
+@Table(name = "cells", schema = "debrief_mgmt")
 public class Cell extends BaseEntity {
 
     @Column(name = "value")

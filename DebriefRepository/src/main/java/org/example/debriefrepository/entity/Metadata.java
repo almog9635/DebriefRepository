@@ -7,9 +7,9 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
-@Embeddable
 @Getter
 @Setter
+@Embeddable
 public class Metadata {
 
     @Column(name = "creator_id", nullable = false)

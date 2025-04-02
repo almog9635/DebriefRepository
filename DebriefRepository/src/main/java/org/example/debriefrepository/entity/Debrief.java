@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "debrief", schema = "debrief_mgmt")
-public class Debrief extends BaseEntity{
+public class Debrief extends BaseEntity {
 
     @Column(name = "date", nullable = false)
     private ZonedDateTime date;

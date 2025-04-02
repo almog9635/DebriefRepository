@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.Group;
 import org.example.debriefrepository.service.GroupService;
+import org.example.debriefrepository.types.consts.consts;
 import org.example.debriefrepository.types.input.GroupInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -28,12 +29,12 @@ public class GroupController {
     }
 
     @QueryMapping
-    public Group groups(@Argument("input") Map<String, Object> input) {
+    public Group groups(@Argument(consts.INPUT) Map<String, Object> input) {
         return groupService.getGroup(input);
     }
 
     @MutationMapping
-    public Group createGroup(@Argument("input") GroupInput groupinput,  @ContextValue String userId) {
+    public Group createGroup(@Argument(consts.INPUT) GroupInput groupinput,  @ContextValue String userId) {
         Group newGroup = null;
         try{
             UserContext.setCurrentUserId(userId);
@@ -45,7 +46,7 @@ public class GroupController {
     }
 
     @MutationMapping
-    public Group updateGroup(@Argument("input") GroupInput input, @ContextValue String userId) {
+    public Group updateGroup(@Argument(consts.INPUT) GroupInput input, @ContextValue String userId) {
         Group newGroup = null;
         try{
             UserContext.setCurrentUserId(userId);
