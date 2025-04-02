@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@jakarta.persistence.Table(name = "\"row\"", schema = "debrief_mgmt")
+@jakarta.persistence.Table(name = "rows", schema = "debrief_mgmt")
 public class Row extends OrderedItem{
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

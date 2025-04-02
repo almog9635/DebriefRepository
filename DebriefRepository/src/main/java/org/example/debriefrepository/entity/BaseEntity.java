@@ -21,5 +21,4 @@ public class BaseEntity {
     @Embedded
     private Metadata metaData;
 
-
 }

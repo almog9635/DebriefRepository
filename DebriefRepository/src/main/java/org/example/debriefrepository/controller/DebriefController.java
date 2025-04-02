@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.Debrief;
 import org.example.debriefrepository.service.debrief.DebriefService;
+import org.example.debriefrepository.types.consts.consts;
 import org.example.debriefrepository.types.input.DebriefInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -23,7 +24,7 @@ public class DebriefController {
     private final DebriefService debriefService;
 
     @QueryMapping
-    public List<Debrief> debriefs(@Argument("input") Map<String, Object> input) {
+    public List<Debrief> debriefs(@Argument(consts.INPUT) Map<String, Object> input) {
         return debriefService.getDebriefs(input);
     }
 
@@ -33,7 +34,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Debrief createDebrief(@Argument("input") DebriefInput debrief, @ContextValue String userId) {
+    public Debrief createDebrief(@Argument(consts.INPUT) DebriefInput debrief, @ContextValue String userId) {
         Debrief newDebrief = null;
         try{
             UserContext.setCurrentUserId(userId);
@@ -45,7 +46,7 @@ public class DebriefController {
     }
 
     @MutationMapping
-    public Debrief updateDebrief(@Argument("input") DebriefInput input, @ContextValue String userId) {
+    public Debrief updateDebrief(@Argument(consts.INPUT) DebriefInput input, @ContextValue String userId) {
         Debrief updatedDebrief = null;
         try{
             UserContext.setCurrentUserId(userId);

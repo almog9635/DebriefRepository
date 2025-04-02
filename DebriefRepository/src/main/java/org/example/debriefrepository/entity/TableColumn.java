@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@jakarta.persistence.Table(name = "table_column", schema = "debrief_mgmt")
+@jakarta.persistence.Table(name = "table_columns", schema = "debrief_mgmt")
 public class TableColumn extends OrderedItem {
 
     @Column(name = "name", nullable = false)
