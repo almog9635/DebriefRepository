@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 
 public class MetadataListener {
 
-    private static Log log = LogFactory.getLog(MetadataListener.class);
+    private static final Log log = LogFactory.getLog(MetadataListener.class);
 
 
     @PreUpdate
