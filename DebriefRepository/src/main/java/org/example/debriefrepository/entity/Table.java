@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Entity
 @DiscriminatorValue("TABLE")
-public class Table extends ContentItem{
+public class Table extends ContentItem {
 
     @OneToMany(mappedBy = "table")
     private List<TableColumn> columns = new ArrayList<>();

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext;
 import org.example.debriefrepository.entity.User;
 import org.example.debriefrepository.service.UserService;
+import org.example.debriefrepository.types.consts.consts;
 import org.example.debriefrepository.types.input.UserInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -24,7 +25,7 @@ public class UserController {
     private final UserService userService;
 
     @QueryMapping
-    public List<User> users(@Argument("input") Map<String, Object> input) {
+    public List<User> users(@Argument(consts.INPUT) Map<String, Object> input) {
         return userService.getUser(input);
     }
 
@@ -34,7 +35,7 @@ public class UserController {
     }
 
     @MutationMapping
-    public User createUser(@Argument("input") UserInput user, @ContextValue String userId) {
+    public User createUser(@Argument(consts.INPUT) UserInput user, @ContextValue String userId) {
         User newUser = null;
         try {
             UserContext.setCurrentUserId(userId);
@@ -47,7 +48,7 @@ public class UserController {
     }
 
     @MutationMapping
-    public User updateUser(@Argument("input") UserInput user, @ContextValue String userId) {
+    public User updateUser(@Argument(consts.INPUT) UserInput user, @ContextValue String userId) {
         User updatedUser = null;
         try {
             UserContext.setCurrentUserId(userId);

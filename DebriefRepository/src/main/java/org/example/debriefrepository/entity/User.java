@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "\"user\"", schema = "debrief_mgmt")
+@Table(name = "user", schema = "debrief_mgmt")
 public class User extends BaseEntity {
     
     @Column(name = "last_name", nullable = false)

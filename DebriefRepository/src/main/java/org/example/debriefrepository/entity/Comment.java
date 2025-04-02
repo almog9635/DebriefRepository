@@ -9,14 +9,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "comment", schema = "debrief_mgmt")
-public class Comment extends OrderedItem{
-
-    @Column(name = "bullet", nullable = false)
-    private String bullet;
+@Table(name = "comments", schema = "debrief_mgmt")
+public class Comment extends OrderedItem {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "paragraph_id", nullable = false)
     private Paragraph paragraph;
+
+    @Column(name = "bullet", nullable = false)
+    private String bullet;
 
 }
