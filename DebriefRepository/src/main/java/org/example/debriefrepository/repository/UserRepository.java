@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, String> {
+
     List<User> findByFirstName(String firstName);
     List<User> findByLastName(String lastName);
     List<User> findByRank(RankEnum rank);

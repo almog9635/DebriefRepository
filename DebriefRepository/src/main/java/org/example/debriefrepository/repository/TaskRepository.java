@@ -7,7 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, String> {
-    List<Task> findByStartDate(ZonedDateTime startDate);
 
+    List<Task> findByStartDate(ZonedDateTime startDate);
     List<Task> findByDeadline(ZonedDateTime deadline);
 }

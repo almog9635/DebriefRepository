@@ -13,5 +13,4 @@ public class ContentInput {
 
     private List<ParagraphInput> paragraphs;
     private List<TableInput> tables;
-
 }

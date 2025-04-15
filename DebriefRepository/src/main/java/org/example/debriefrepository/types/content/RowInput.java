@@ -9,8 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class RowInput extends  OrderedItemInput{
+public class RowInput extends OrderedItemInput {
 
     private List<CellInput> cells;
-
 }

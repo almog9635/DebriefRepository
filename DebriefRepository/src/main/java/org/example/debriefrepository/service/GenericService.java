@@ -21,18 +21,18 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class GenericService <T extends BaseEntity, U>{
+public class GenericService<T extends BaseEntity, U> {
 
     private final DebriefRepository debriefRepository;
-    
+
     private final UserRepository userRepository;
-    
+
     private final GroupRepository groupRepository;
-    
+
     private final RoleRepository roleRepository;
-    
+
     private final TaskRepository taskRepository;
-    
+
     private final LessonRepository lessonRepository;
 
     private final CommentRepository commentRepository;
@@ -47,10 +47,13 @@ public class GenericService <T extends BaseEntity, U>{
 
     private final CellRepository cellRepository;
 
+    private final List<JpaRepository<? extends BaseEntity, String>> jpaRepositoryList;
+
     private final Logger logger = LoggerFactory.getLogger(GenericService.class);
 
     private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> repositories;
 
+    /* todo: change it to a generic way to get the type of the repo */
     @PostConstruct
     private void init() {
         repositories = Map.ofEntries(
@@ -68,9 +71,9 @@ public class GenericService <T extends BaseEntity, U>{
                 Map.entry(Cell.class, cellRepository)
         );
     }
-    
-    public T setFieldsGeneric(T entity, U input, Map<String, Function<Object,
-            Object>> customProcessors, List<String> skipFields) {
+
+    public T setFields(T entity, U input, Map<String, Function<Object, Object>> customProcessors,
+                       List<String> skipFields) {
         List<Field> fields = getAllFields(entity.getClass());
         for (Field entityField : fields) {
             entityField.setAccessible(true);
@@ -80,6 +83,7 @@ public class GenericService <T extends BaseEntity, U>{
                     skipFields.contains(fieldName))) {
                 continue;
             }
+
             try {
 
                 Object value = getFieldValue(input, fieldName);
@@ -100,7 +104,7 @@ public class GenericService <T extends BaseEntity, U>{
                 } else {
 
                     Column annotation = entityField.getAnnotation(Column.class);
-                    boolean isNullable = !(Objects.isNull(annotation)) &&  annotation.nullable();
+                    boolean isNullable = !(Objects.isNull(annotation)) && annotation.nullable();
 
                     if (!isNullable && Objects.nonNull(entity.getClass().getField(fieldName))) {
                         throw new IllegalArgumentException("Field '" + fieldName + "' cannot be null");
@@ -118,16 +122,14 @@ public class GenericService <T extends BaseEntity, U>{
 
     private Object fetchEntities(Field field, Object value) {
         Class<?> type = findListType(field);
-        if(type == UserRole.class){
+        if (type == UserRole.class) {
             type = Role.class;
         }
         JpaRepository<? extends BaseEntity, String> repository = repositories.get(type);
 
-
-        // @ManyToOne fields cases
         if (field.isAnnotationPresent(ManyToOne.class) || value instanceof String) {
-            try{
-                return repository.findById((String)value)
+            try {
+                return repository.findById((String) value)
                         .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + value));
             } catch (IllegalArgumentException e) {
                 logger.error(e.getMessage());
@@ -135,9 +137,8 @@ public class GenericService <T extends BaseEntity, U>{
             }
         }
 
-        // @OneToMany fields cases
-        if(field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
-            try{
+        if (field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
+            try {
                 List<?> values = (List<?>) value;
                 return values.stream()
                         .map(id -> repository.findById(id.toString())
@@ -156,7 +157,7 @@ public class GenericService <T extends BaseEntity, U>{
     /**
      * Recursively collects all declared fields for a class.
      */
-    private List<Field> getAllFields(Class clazz){
+    private List<Field> getAllFields(Class clazz) {
         if (clazz == null) {
             return Collections.emptyList();
         }

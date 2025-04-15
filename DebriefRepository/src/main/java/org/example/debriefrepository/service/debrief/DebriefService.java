@@ -51,7 +51,7 @@ public class DebriefService {
 
     public Debrief createDebrief(DebriefInput input) {
         Debrief debrief = new Debrief();
-        try{
+        try {
             List<String> skippedFields = new ArrayList<>();
             skippedFields.add("id");
             skippedFields.add("contentItems");
@@ -59,7 +59,10 @@ public class DebriefService {
             skippedFields.add("tasks");
             debrief = setFields(debrief, input, skippedFields);
             debriefRepository.save(debrief);
-            setFields(debrief, input, null);
+            skippedFields.remove("contentItems");
+            skippedFields.remove("lessons");
+            skippedFields.remove("tasks");
+            setFields(debrief, input, skippedFields);
             return debriefRepository.save(debrief);
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -138,10 +141,10 @@ public class DebriefService {
     }
 
     public Boolean deleteDebriefById(String id) {
-        if(debriefRepository.existsById(id)) {
-            try{
+        if (debriefRepository.existsById(id)) {
+            try {
                 debriefRepository.deleteById(id);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
@@ -170,7 +173,7 @@ public class DebriefService {
     }
 
 
-    private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skippFields) {
+    private Debrief setFields(Debrief debrief, DebriefInput input, List<String> skippFields) {
         Map<String, Function<Object, Object>> customProcessors = new HashMap<>();
         customProcessors.put("contentItems", rawValue -> {
             if (rawValue instanceof ContentInput contentInput) {
@@ -199,14 +202,14 @@ public class DebriefService {
                 }
                 return items;
             }
-                throw new IllegalArgumentException("Invalid value for contentItems field");
+            throw new IllegalArgumentException("Invalid value for contentItems field");
         });
 
         customProcessors.put("tasks", value -> {
-            if(!((List<TaskInput>)value).isEmpty()){
+            if (!((List<TaskInput>) value).isEmpty()) {
                 List<Task> tasks = new ArrayList<>();
-                for (TaskInput taskInput : ((List<TaskInput>)value)) {
-                    if(Objects.isNull(taskInput.id()) || taskInput.id().isBlank()){
+                for (TaskInput taskInput : ((List<TaskInput>) value)) {
+                    if (Objects.isNull(taskInput.id()) || taskInput.id().isBlank()) {
                         tasks.add(taskService.createTask(taskInput, debrief.getId(), null));
                     } else {
                         tasks.add(taskService.updateTask(taskInput));
@@ -217,11 +220,11 @@ public class DebriefService {
             throw new IllegalArgumentException("Invalid value for tasks field");
         });
 
-        customProcessors.put("lessons", value ->{
-            if(!((List<LessonInput>)value).isEmpty()){
+        customProcessors.put("lessons", value -> {
+            if (!((List<LessonInput>) value).isEmpty()) {
                 List<Lesson> lessons = new ArrayList<>();
-                for (LessonInput lessonInput : ((List<LessonInput>)value)) {
-                    if(Objects.isNull(lessonInput.id()) || lessonInput.id().isBlank()){
+                for (LessonInput lessonInput : ((List<LessonInput>) value)) {
+                    if (Objects.isNull(lessonInput.id()) || lessonInput.id().isBlank()) {
                         lessons.add(lessonService.createLesson(lessonInput, debrief.getId()));
                     } else {
                         lessons.add(lessonService.updateLesson(lessonInput));
@@ -232,7 +235,7 @@ public class DebriefService {
             throw new IllegalArgumentException("Invalid value for lessons field");
         });
 
-        return genericService.setFieldsGeneric(debrief, input, customProcessors, skippFields);
+        return genericService.setFields(debrief, input, customProcessors, skippFields);
     }
 
     /**

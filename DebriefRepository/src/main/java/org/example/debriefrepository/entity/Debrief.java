@@ -1,7 +1,6 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,27 +12,24 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "debrief", schema = "debrief_mgmt")
+@Table(name = "debrief")
 public class Debrief extends BaseEntity {
 
     @Column(name = "date", nullable = false)
     private ZonedDateTime date;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "title", nullable = false)
+    private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
-
-    @OneToMany(mappedBy = "debrief")
+    @OneToMany(mappedBy = "debrief", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ContentItem> contentItems = new ArrayList<>();
 
-    @OneToMany(mappedBy = "debrief")
+    @OneToMany(mappedBy = "debrief", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Lesson> lessons = new ArrayList<>();
 
-    @OneToMany(mappedBy = "debrief")
+    @OneToMany(mappedBy = "debrief", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
-
 }

@@ -21,40 +21,13 @@ import java.util.*;
 public class GroupService {
 
     @Autowired
-    private final UserRepository userRepository;
-
-    @Autowired
     private final GroupRepository groupRepository;
-
-    @Autowired
-    private final RoleRepository roleRepository;
-
-    @Autowired
-    private final TaskRepository taskRepository;
-
-    @Autowired
-    private final DebriefRepository debriefRepository;
-
-    @Autowired
-    private final LessonRepository lessonRepository;
 
     @Autowired
     private final GenericService<Group, GroupInput> genericService;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    private Map<Class<? extends BaseEntity>, JpaRepository<? extends BaseEntity, String>> REPOSITORY_MAP;
-
-    @PostConstruct
-    private void init() {
-        REPOSITORY_MAP = Map.of(
-                Group.class, groupRepository,
-                Role.class, roleRepository,
-                Task.class, taskRepository,
-                Lesson.class, lessonRepository,
-                Debrief.class, debriefRepository
-        );
-    }
     public List<Group> findAll() {
         return groupRepository.findAll();
     }
@@ -125,7 +98,6 @@ public class GroupService {
         return groups.stream().findFirst().orElse(null);
     }
 
-    @Transactional
     public Group update(GroupInput input) {
         try {
             String groupId = input.id();
@@ -142,13 +114,10 @@ public class GroupService {
         return groupRepository.save(setFields(new Group(), groupInput));
     }
 
-    /**
-     * Uses reflection to map input fields to the Group entity.
-     */
     private Group setFields(Group group, GroupInput input) {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        return genericService.setFieldsGeneric(group, input,null, skippedFields);
+        return genericService.setFields(group, input, null, skippedFields);
     }
 
     /**
@@ -164,6 +133,7 @@ public class GroupService {
             String nestedKey = mapValue.keySet().iterator().next().toString();
             methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
         }
+
         return methodName.toString();
     }
 
@@ -171,9 +141,9 @@ public class GroupService {
     public Boolean deleteById(String id) {
         if (groupRepository.findById(id).isEmpty())
             return false;
-        try{
+        try {
             groupRepository.deleteById(id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

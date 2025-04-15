@@ -14,5 +14,4 @@ public class TableInput extends ContentItem {
 
     List<ColumnInput> columns;
     List<RowInput> rows;
-
 }

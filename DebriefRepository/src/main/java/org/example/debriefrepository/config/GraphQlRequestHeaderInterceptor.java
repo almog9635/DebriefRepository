@@ -1,7 +1,7 @@
 package org.example.debriefrepository.config;
 
 
-import org.example.debriefrepository.types.consts.consts;
+import org.example.debriefrepository.types.consts.Const;
 import org.springframework.graphql.server.WebGraphQlInterceptor;
 import org.springframework.graphql.server.WebGraphQlRequest;
 import org.springframework.graphql.server.WebGraphQlResponse;
@@ -17,7 +17,7 @@ public class GraphQlRequestHeaderInterceptor implements WebGraphQlInterceptor {
     @Override
     public Mono<WebGraphQlResponse> intercept(WebGraphQlRequest request, Chain chain) {
         try {
-            String userId = request.getHeaders().getFirst(consts.USER_ID);
+            String userId = request.getHeaders().getFirst(Const.USER_ID_HEADER_NAME);
             if (Objects.nonNull(userId)) {
                 request.configureExecutionInput((executionInput, builder) ->
                         builder.graphQLContext(Collections.singletonMap("userId", userId)).build()

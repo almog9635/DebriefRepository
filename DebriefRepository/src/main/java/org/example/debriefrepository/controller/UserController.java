@@ -1,10 +1,10 @@
 package org.example.debriefrepository.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.config.UserContext;
+import org.example.debriefrepository.config.UserContext.WithUserContext;
 import org.example.debriefrepository.entity.User;
 import org.example.debriefrepository.service.UserService;
-import org.example.debriefrepository.types.consts.consts;
+import org.example.debriefrepository.types.consts.Const;
 import org.example.debriefrepository.types.input.UserInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -12,7 +12,6 @@ import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @QueryMapping
-    public List<User> users(@Argument(consts.INPUT) Map<String, Object> input) {
+    public List<User> users(@Argument(Const.INPUT) Map<String, Object> input) {
         return userService.getUser(input);
     }
 
@@ -34,30 +33,16 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @WithUserContext
     @MutationMapping
-    public User createUser(@Argument(consts.INPUT) UserInput user, @ContextValue String userId) {
-        User newUser = null;
-        try {
-            UserContext.setCurrentUserId(userId);
-            newUser =  userService.createUser(user);
-        }
-        finally {
-            UserContext.clear();
-        }
-        return newUser;
+    public User createUser(@Argument(Const.INPUT) UserInput user, @ContextValue String userId) {
+        return userService.createUser(user);
     }
 
+    @WithUserContext
     @MutationMapping
-    public User updateUser(@Argument(consts.INPUT) UserInput user, @ContextValue String userId) {
-        User updatedUser = null;
-        try {
-            UserContext.setCurrentUserId(userId);
-            updatedUser =  userService.update(user);
-        }
-        finally {
-            UserContext.clear();
-        }
-        return updatedUser;
+    public User updateUser(@Argument(Const.INPUT) UserInput input, @ContextValue String userId) {
+        return userService.update(input);
     }
 
     @MutationMapping

@@ -10,8 +10,8 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@jakarta.persistence.Table(name = "rows", schema = "debrief_mgmt")
-public class Row extends OrderedItem{
+@jakarta.persistence.Table(name = "rows")
+public class Row extends OrderedItem {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "table_id", nullable = false)
@@ -19,5 +19,4 @@ public class Row extends OrderedItem{
 
     @OneToMany(mappedBy = "row")
     private List<Cell> cells = new ArrayList<>();
-
 }

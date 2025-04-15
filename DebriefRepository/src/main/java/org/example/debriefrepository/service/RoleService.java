@@ -22,19 +22,7 @@ public class RoleService {
     private final UserRepository userRepository;
 
     @Autowired
-    private final GroupRepository groupRepository;
-
-    @Autowired
     private final RoleRepository roleRepository;
-
-    @Autowired
-    private final TaskRepository taskRepository;
-
-    @Autowired
-    private final DebriefRepository debriefRepository;
-
-    @Autowired
-    private final LessonRepository lessonRepository;
 
     @Autowired
     private final GenericService<Role, RoleInput> genericService;
@@ -43,7 +31,7 @@ public class RoleService {
 
     public Role createRole(RoleInput roleInput) {
         Role role = new Role();
-        try{
+        try {
             return roleRepository.save(setFields(role, roleInput));
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -87,7 +75,7 @@ public class RoleService {
             }
         }
 
-        return roles.stream().findFirst().orElseThrow(()-> new RuntimeException("Failed to find any roles by name."));
+        return roles.stream().findFirst().orElseThrow(() -> new RuntimeException("Failed to find any roles by name."));
     }
 
     /***
@@ -154,9 +142,9 @@ public class RoleService {
     public Boolean deleteById(String id) {
         if (roleRepository.findById(id).isEmpty())
             return false;
-        try{
+        try {
             roleRepository.deleteById(id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -183,7 +171,7 @@ public class RoleService {
     private Role setFields(Role role, RoleInput input) {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        return genericService.setFieldsGeneric(role, input, null, skippedFields);
+        return genericService.setFields(role, input, null, skippedFields);
     }
 
 }

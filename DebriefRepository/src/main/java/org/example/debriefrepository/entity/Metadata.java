@@ -12,11 +12,11 @@ import java.time.ZonedDateTime;
 @Embeddable
 public class Metadata {
 
-    @Column(name = "creator_id", nullable = false)
-    private String creatorId;
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
 
-    @Column(name = "modifier_id", nullable = false)
-    private String modifierId;
+    @Column(name = "updated_by", nullable = false)
+    private String updatedBy;
 
     @Column(name = "created", nullable = false)
     private ZonedDateTime created;

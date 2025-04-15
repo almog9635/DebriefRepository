@@ -47,7 +47,7 @@ public class CommentService {
         String id = input.getId();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        try{
+        try {
             Comment comment = commentRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
             comment = setFields(comment, input, skippedFields);
@@ -60,7 +60,7 @@ public class CommentService {
     }
 
     protected Comment setFields(Comment comment, CommentInput input, List<String> skippedFields) {
-        return genericService.setFieldsGeneric(comment, input, null, skippedFields);
+        return genericService.setFields(comment, input, null, skippedFields);
     }
 
 }

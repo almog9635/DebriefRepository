@@ -42,9 +42,9 @@ public class ParagraphService {
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("comments");
-        paragraph = genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
+        paragraph = genericService.setFields(paragraph, paragraphInput, null, skippedFields);
 
-        try{
+        try {
             paragraph.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
             paragraphRepository.save(paragraph);
@@ -62,7 +62,7 @@ public class ParagraphService {
             }
             paragraph.setComments(savedComments);
 
-            try{
+            try {
                 paragraph = paragraphRepository.save(paragraph);
             } catch (Exception e) {
                 logger.error(e.getMessage());
@@ -79,7 +79,7 @@ public class ParagraphService {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
         skippedFields.add("comments");
-        paragraph = genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
+        paragraph = genericService.setFields(paragraph, paragraphInput, null, skippedFields);
         List<CommentInput> comments = paragraphInput.getComments();
 
         if (Objects.nonNull(comments) && !comments.isEmpty()) {
@@ -89,12 +89,12 @@ public class ParagraphService {
                         .orElse(null);
                 if (Objects.nonNull(existingComment)) {
                     updatedComments.add(commentService.updateComment(commentInput));
-                } else{
+                } else {
                     updatedComments.add(commentService.createComment(commentInput, paragraph.getId()));
                 }
             }
             paragraph.setComments(updatedComments);
-            try{
+            try {
                 paragraph = paragraphRepository.save(paragraph);
             } catch (Exception e) {
                 logger.error(e.getMessage());

@@ -24,7 +24,7 @@ public class TaskService {
 
     private final DebriefRepository debriefRepository;
 
-    private  final TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
     @Autowired
     private final GenericService<Task, TaskInput> genericService;
@@ -37,16 +37,16 @@ public class TaskService {
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("lesson");
-        genericService.setFieldsGeneric(task, taskInput, null, skippedFields);
-        try{
-            if(Objects.nonNull(lessonId)){
+        genericService.setFields(task, taskInput, null, skippedFields);
+        try {
+            if (Objects.nonNull(lessonId)) {
                 task.setLesson(lessonRepository.findById(lessonId)
                         .orElseThrow(() -> new IllegalArgumentException("lesson not found")));
             }
             task.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("debrief not found")));
             return taskRepository.save(task);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
@@ -54,12 +54,12 @@ public class TaskService {
 
     public Task updateTask(TaskInput taskInput) {
         String id = taskInput.id();
-        try{
+        try {
             Task existingTask = taskRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("task not found"));
-            genericService.setFieldsGeneric(existingTask,taskInput,null,null);
+            genericService.setFields(existingTask, taskInput, null, null);
             return taskRepository.save(existingTask);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }

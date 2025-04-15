@@ -1,7 +1,8 @@
 package org.example.debriefrepository.entity;
 
-import jakarta.persistence.*;
-import jakarta.persistence.Table;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,5 +17,4 @@ public class Paragraph extends ContentItem {
 
     @OneToMany(mappedBy = "paragraph")
     private List<Comment> comments = new ArrayList<>();
-
 }

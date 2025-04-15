@@ -1,7 +1,6 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +13,9 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "user", schema = "debrief_mgmt")
+@Table(name = "user")
 public class User extends BaseEntity {
-    
+
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
@@ -38,9 +37,6 @@ public class User extends BaseEntity {
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
-    @OneToMany(mappedBy = "user")
-    private List<Debrief> debriefs = new ArrayList<>();
-
     @OneToMany(mappedBy = "commander")
     private List<Group> groups = new ArrayList<>();
 
@@ -49,5 +45,4 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> roles = new ArrayList<>();
-
 }

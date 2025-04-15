@@ -58,7 +58,7 @@ public class UserService {
 
     public User createUser(UserInput userInput) {
         User user = new User();
-        try{
+        try {
             return userRepository.save(setFields(user, userInput));
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -146,9 +146,9 @@ public class UserService {
     public Boolean deleteById(String id) {
         if (userRepository.findById(id).isEmpty())
             return false;
-        try{
+        try {
             userRepository.deleteById(id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -190,9 +190,9 @@ public class UserService {
                         value = fetchEntities(entityField, value);
 
                         /* ask chanan if there is a better way */
-                        if(entityField.getName().equals("roles")){
+                        if (entityField.getName().equals("roles")) {
                             user.getRoles().clear();
-                            List<UserRole> newRoles = ((List<Role>)value).stream()
+                            List<UserRole> newRoles = ((List<Role>) value).stream()
                                     .map(role -> {
                                         UserRole userRole = new UserRole();
                                         userRole.setRole(role);
@@ -207,11 +207,11 @@ public class UserService {
                     }
 
                     entityField.set(user, value);
-                }else{
+                } else {
                     Column annotation = entityField.getAnnotation(Column.class);
-                    boolean isNullable = !(Objects.isNull(annotation)) &&  annotation.nullable();
+                    boolean isNullable = !(Objects.isNull(annotation)) && annotation.nullable();
 
-                    if(!isNullable && !Objects.isNull(user.getClass().getField(fieldName))) {
+                    if (!isNullable && !Objects.isNull(user.getClass().getField(fieldName))) {
                         throw new IllegalArgumentException("Field '" + fieldName + "' cannot be null");
                     }
                 }
@@ -231,7 +231,7 @@ public class UserService {
      */
     private Object fetchEntities(Field field, Object value) {
         Class<?> type = findListType(field);
-        if(type == UserRole.class){
+        if (type == UserRole.class) {
             type = Role.class;
         }
         JpaRepository<? extends BaseEntity, String> repository = repositories.get(type);
@@ -239,8 +239,8 @@ public class UserService {
 
         // @ManyToOne fields cases
         if (field.isAnnotationPresent(ManyToOne.class) || value instanceof String) {
-            try{
-                return repository.findById((String)value)
+            try {
+                return repository.findById((String) value)
                         .orElseThrow(() -> new IllegalArgumentException("Entity not found for ID: " + value));
             } catch (IllegalArgumentException e) {
                 logger.error(e.getMessage());
@@ -249,8 +249,8 @@ public class UserService {
         }
 
         // @OneToMany fields cases
-        if(field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
-            try{
+        if (field.isAnnotationPresent(OneToMany.class) || value instanceof List<?>) {
+            try {
                 List<?> values = (List<?>) value;
                 return values.stream()
                         .map(id -> repository.findById(id.toString())
@@ -300,7 +300,7 @@ public class UserService {
         return methodName.toString();
     }
 
-    private List<Field> getAllFields(Class clazz){
+    private List<Field> getAllFields(Class clazz) {
         if (clazz == null) {
             return Collections.emptyList();
         }

@@ -1,10 +1,12 @@
 package org.example.debriefrepository.service.contentItem.table;
 
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.*;
-import org.example.debriefrepository.repository.TableColumnRepository;
+import org.example.debriefrepository.entity.Row;
+import org.example.debriefrepository.entity.Table;
+import org.example.debriefrepository.entity.TableColumn;
 import org.example.debriefrepository.repository.DebriefRepository;
 import org.example.debriefrepository.repository.RowRepository;
+import org.example.debriefrepository.repository.TableColumnRepository;
 import org.example.debriefrepository.repository.TableRepository;
 import org.example.debriefrepository.service.GenericService;
 import org.example.debriefrepository.types.content.ColumnInput;
@@ -51,18 +53,18 @@ public class TableService {
         skippedFields.add("debrief");
         skippedFields.add("columns");
         skippedFields.add("rows");
-        table = genericService.setFieldsGeneric(table, input, null, skippedFields);
-        try{
+        table = genericService.setFields(table, input, null, skippedFields);
+        try {
             table.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
             tableRepository.save(table);
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException("Error creating table: " + input, e);
         }
         List<ColumnInput> cols = input.getColumns();
         List<RowInput> rows = input.getRows();
-        if(Objects.nonNull(cols) && !cols.isEmpty() &&
+        if (Objects.nonNull(cols) && !cols.isEmpty() &&
                 Objects.nonNull(rows) && !rows.isEmpty()) {
             List<TableColumn> savedCols = new ArrayList<>();
             for (ColumnInput columnInput : cols) {
@@ -76,9 +78,9 @@ public class TableService {
                 savedRows.add(newRow);
             }
             table.setRows(savedRows);
-            try{
+            try {
                 return tableRepository.save(table);
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getMessage());
                 throw new RuntimeException("Error creating table: " + input, e);
             }
@@ -95,16 +97,16 @@ public class TableService {
         skippedFields.add("id");
         skippedFields.add("columns");
         skippedFields.add("rows");
-        existingTable = genericService.setFieldsGeneric(existingTable, input, null, skippedFields);
+        existingTable = genericService.setFields(existingTable, input, null, skippedFields);
         List<ColumnInput> cols = input.getColumns();
         List<RowInput> rows = input.getRows();
-        if(Objects.nonNull(cols) && !cols.isEmpty() &&
+        if (Objects.nonNull(cols) && !cols.isEmpty() &&
                 Objects.nonNull(rows) && !rows.isEmpty()) {
             List<TableColumn> savedCols = new ArrayList<>();
             for (ColumnInput columnInput : cols) {
                 TableColumn existingCol = tableColumnRepository.findById(columnInput.getId())
                         .orElse(null);
-                if(Objects.nonNull(existingCol)) {
+                if (Objects.nonNull(existingCol)) {
                     savedCols.add(tableColumnService.updateColumn(columnInput));
                 } else {
                     savedCols.add(tableColumnService.createColumn(columnInput, existingTable.getId()));
@@ -115,16 +117,16 @@ public class TableService {
             for (RowInput rowInput : rows) {
                 Row existingRow = rowRepository.findById(rowInput.getId())
                         .orElse(null);
-                if(Objects.nonNull(existingRow)) {
+                if (Objects.nonNull(existingRow)) {
                     savedRows.add(rowService.updateRow(rowInput));
                 } else {
                     savedRows.add(rowService.createRow(rowInput, existingTable.getId()));
                 }
             }
             existingTable.setRows(savedRows);
-            try{
+            try {
                 return tableRepository.save(existingTable);
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getMessage());
                 throw new RuntimeException("Error creating table: " + input, e);
             }

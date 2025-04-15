@@ -1,4 +1,4 @@
-package org.example.debriefrepository.config;
+package org.example.debriefrepository.config.UserContext;
 
 public class UserContext {
 

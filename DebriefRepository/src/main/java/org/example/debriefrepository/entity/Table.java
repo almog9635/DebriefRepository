@@ -20,5 +20,4 @@ public class Table extends ContentItem {
 
     @OneToMany(mappedBy = "table")
     private List<Row> rows = new ArrayList<>();
-
 }

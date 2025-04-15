@@ -1,7 +1,6 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.debriefrepository.listener.MetadataListener;
@@ -20,5 +19,4 @@ public class BaseEntity {
 
     @Embedded
     private Metadata metaData;
-
 }
