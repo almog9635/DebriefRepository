@@ -7,7 +7,6 @@ type User{
     roles: [UserRole!]!
     group: Group!
     rank: RankEnum!
-    debriefs: [Debrief!]
     tasks: [Task!]
 }
 
