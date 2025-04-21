@@ -17,6 +17,7 @@ public class Row extends OrderedItem {
     @JoinColumn(name = "table_id", nullable = false)
     private Table table;
 
-    @OneToMany(mappedBy = "row")
+    @OneToMany(mappedBy = "row", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Cell> cells = new ArrayList<>();
 }

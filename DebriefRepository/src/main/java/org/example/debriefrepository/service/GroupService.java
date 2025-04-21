@@ -1,15 +1,13 @@
 package org.example.debriefrepository.service;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.debriefrepository.entity.*;
-import org.example.debriefrepository.repository.*;
+import org.example.debriefrepository.entity.Group;
+import org.example.debriefrepository.repository.GroupRepository;
 import org.example.debriefrepository.types.input.GroupInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;

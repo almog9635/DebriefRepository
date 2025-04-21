@@ -15,7 +15,6 @@ public class MetadataListener {
 
     private static final Log log = LogFactory.getLog(MetadataListener.class);
 
-
     @PreUpdate
     @PreRemove
     @PrePersist

@@ -24,6 +24,9 @@ public class Task extends BaseEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
+    @Column(name = "completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean completed = false;
+
     @Column(name = "start_date", nullable = false)
     private ZonedDateTime startDate;
 

@@ -8,6 +8,7 @@ import java.util.List;
 public record DebriefInput(
         String id,
         String title,
+        String labels,
         ContentInput contentItems,
         ZonedDateTime date,
         List<LessonInput> lessons,

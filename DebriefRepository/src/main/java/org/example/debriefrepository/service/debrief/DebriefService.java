@@ -51,12 +51,12 @@ public class DebriefService {
 
     public Debrief createDebrief(DebriefInput input) {
         Debrief debrief = new Debrief();
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        skippedFields.add("contentItems");
+        skippedFields.add("lessons");
+        skippedFields.add("tasks");
         try {
-            List<String> skippedFields = new ArrayList<>();
-            skippedFields.add("id");
-            skippedFields.add("contentItems");
-            skippedFields.add("lessons");
-            skippedFields.add("tasks");
             debrief = setFields(debrief, input, skippedFields);
             debriefRepository.save(debrief);
             skippedFields.remove("contentItems");

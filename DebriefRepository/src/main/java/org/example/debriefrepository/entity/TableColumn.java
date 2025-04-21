@@ -20,6 +20,7 @@ public class TableColumn extends OrderedItem {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "column")
+    @OneToMany(mappedBy = "column", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Cell> cells = new ArrayList<>();
 }

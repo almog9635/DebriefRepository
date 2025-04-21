@@ -43,7 +43,6 @@ public class ParagraphService {
         skippedFields.add("debrief");
         skippedFields.add("comments");
         paragraph = genericService.setFields(paragraph, paragraphInput, null, skippedFields);
-
         try {
             paragraph.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
