@@ -1,0 +1,6 @@
+type Metadata {
+    createdBy: String!
+    updatedBy: String!
+    created: ZonedDateTime!
+    modified: ZonedDateTime!
+}
