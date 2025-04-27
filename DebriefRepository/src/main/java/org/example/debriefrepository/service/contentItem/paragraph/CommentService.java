@@ -16,14 +16,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CommentService {
+public class CommentService extends GenericService<Comment, CommentInput> {
 
     private final CommentRepository commentRepository;
 
     private final ParagraphRepository paragraphRepository;
-
-    @Autowired
-    private final GenericService<Comment, CommentInput> genericService;
 
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
@@ -47,7 +44,7 @@ public class CommentService {
         String id = input.getId();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        try{
+        try {
             Comment comment = commentRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
             comment = setFields(comment, input, skippedFields);
@@ -60,7 +57,7 @@ public class CommentService {
     }
 
     protected Comment setFields(Comment comment, CommentInput input, List<String> skippedFields) {
-        return genericService.setFieldsGeneric(comment, input, null, skippedFields);
+        return super.setFields(comment, input, null, skippedFields);
     }
 
 }

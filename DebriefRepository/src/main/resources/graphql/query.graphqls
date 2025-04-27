@@ -5,7 +5,7 @@ type Query{
     getAllUsers: [User!]!
     users(input: UserInput): [User!]
 
-    roles(input: RoleInput!): [Role!]
+    roles(input: RoleInput!): Role!
     getAllRoles: [Role!]!
 
     groups(input: GroupInput!): Group!

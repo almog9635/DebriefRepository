@@ -15,21 +15,18 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CellService {
+public class CellService extends GenericService<Cell, CellInput> {
 
     private final CellRepository cellRepository;
-
-    @Autowired
-    private final GenericService<Cell, CellInput> genericService;
 
     private final Logger logger = LoggerFactory.getLogger(CellService.class);
 
     public Cell createCell(CellInput input) {
         Cell cell = new Cell();
-        cell = genericService.setFieldsGeneric(cell, input, null, null);
-        try{
+        cell = super.setFields(cell, input, null, null);
+        try {
             return cellRepository.save(cell);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
@@ -39,12 +36,12 @@ public class CellService {
         String id = input.getId();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        try{
+        try {
             Cell existingCell = cellRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid cell id: " + id));
-            genericService.setFieldsGeneric(existingCell, input, null, skippedFields);
+            super.setFields(existingCell, input, null, skippedFields);
             return cellRepository.save(existingCell);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }

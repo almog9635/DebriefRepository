@@ -3,7 +3,6 @@ type Group{
     name: String!
     commander: User
     users: [User!]!
-    debriefs: [Debrief!]!
 }
 
 input GroupInput{

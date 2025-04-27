@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class LessonService {
+public class LessonService extends GenericService<Lesson, LessonInput> {
 
     private final LessonRepository lessonRepository;
 
@@ -27,37 +27,33 @@ public class LessonService {
 
     private final TaskService taskService;
 
-    @Autowired
-    private GenericService<Lesson, LessonInput> genericService;
-
     private final Logger logger = LoggerFactory.getLogger(LessonService.class);
 
-    /* todo: add mission implementation */
     public Lesson createLesson(LessonInput input, String debriefId) {
         Lesson lesson = new Lesson();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("tasks");
-        genericService.setFieldsGeneric(lesson,input,null,skippedFields);
-        try{
+        super.setFields(lesson, input, null, skippedFields);
+        try {
             lesson.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("debrief not found")));
             lessonRepository.save(lesson);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
         List<TaskInput> tasks = input.tasks();
         List<Task> savedTasks = new ArrayList<>();
-        if(!tasks.isEmpty()){
+        if (!tasks.isEmpty()) {
             for (TaskInput task : tasks) {
                 savedTasks.add(taskService.createTask(task, debriefId, lesson.getId()));
             }
             lesson.setTasks(savedTasks);
-            try{
+            try {
                 return lessonRepository.save(lesson);
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.error(e.getMessage());
                 throw new RuntimeException(e);
             }
@@ -70,29 +66,29 @@ public class LessonService {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("tasks");
         Lesson existingLesson = null;
-        try{
+        try {
             existingLesson = lessonRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("debrief not found"));
-            genericService.setFieldsGeneric(existingLesson,input,null,skippedFields);
+            super.setFields(existingLesson, input, null, skippedFields);
 
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
         List<Task> savedTasks = new ArrayList<>();
-        if(!input.tasks().isEmpty()){
+        if (!input.tasks().isEmpty()) {
             for (TaskInput task : input.tasks()) {
-                if(Objects.isNull(task.id()) || task.id().isBlank()){
-                    savedTasks.add(taskService.createTask(task,existingLesson.getDebrief().getId(), id));
+                if (Objects.isNull(task.id()) || task.id().isBlank()) {
+                    savedTasks.add(taskService.createTask(task, existingLesson.getDebrief().getId(), id));
                 } else {
                     savedTasks.add(taskService.updateTask(task));
                 }
             }
             existingLesson.setTasks(savedTasks);
         }
-        try{
+        try {
             return lessonRepository.save(existingLesson);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }

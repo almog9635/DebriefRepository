@@ -10,14 +10,14 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@jakarta.persistence.Table(name = "rows", schema = "debrief_mgmt")
-public class Row extends OrderedItem{
+@jakarta.persistence.Table(name = "rows")
+public class Row extends OrderedItem {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "table_id", nullable = false)
     private Table table;
 
-    @OneToMany(mappedBy = "row")
+    @OneToMany(mappedBy = "row", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Cell> cells = new ArrayList<>();
-
 }

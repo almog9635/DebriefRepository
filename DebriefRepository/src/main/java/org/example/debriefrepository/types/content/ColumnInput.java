@@ -8,8 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class ColumnInput extends OrderedItemInput{
+public class ColumnInput extends OrderedItemInput {
 
     private String name;
-
 }

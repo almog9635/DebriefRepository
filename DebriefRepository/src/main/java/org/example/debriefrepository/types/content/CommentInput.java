@@ -10,5 +10,4 @@ import lombok.Setter;
 public class CommentInput extends OrderedItemInput {
 
     private String bullet;
-
 }

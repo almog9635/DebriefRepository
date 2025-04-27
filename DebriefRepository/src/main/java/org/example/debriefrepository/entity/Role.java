@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "role", schema = "debrief_mgmt")
+@Table(name = "role")
 public class Role extends BaseEntity {
 
     @Column(name = "name", nullable = false)
@@ -21,5 +21,4 @@ public class Role extends BaseEntity {
 
     @OneToMany(mappedBy = "role")
     private List<UserRole> users = new ArrayList<>();
-
 }

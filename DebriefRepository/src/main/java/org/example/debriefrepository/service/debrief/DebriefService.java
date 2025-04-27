@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class DebriefService {
+public class DebriefService extends GenericService<Debrief, DebriefInput> {
 
     @Autowired
     private final DebriefRepository debriefRepository;
@@ -44,22 +44,22 @@ public class DebriefService {
     @Autowired
     private final TaskService taskService;
 
-    @Autowired
-    private GenericService<Debrief, DebriefInput> genericService;
-
     private static final Logger logger = LoggerFactory.getLogger(DebriefService.class);
 
     public Debrief createDebrief(DebriefInput input) {
         Debrief debrief = new Debrief();
-        try{
-            List<String> skippedFields = new ArrayList<>();
-            skippedFields.add("id");
-            skippedFields.add("contentItems");
-            skippedFields.add("lessons");
-            skippedFields.add("tasks");
+        List<String> skippedFields = new ArrayList<>();
+        skippedFields.add("id");
+        skippedFields.add("contentItems");
+        skippedFields.add("lessons");
+        skippedFields.add("tasks");
+        try {
             debrief = setFields(debrief, input, skippedFields);
             debriefRepository.save(debrief);
-            setFields(debrief, input, null);
+            skippedFields.remove("contentItems");
+            skippedFields.remove("lessons");
+            skippedFields.remove("tasks");
+            setFields(debrief, input, skippedFields);
             return debriefRepository.save(debrief);
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -73,75 +73,14 @@ public class DebriefService {
     }
 
     public List<Debrief> getDebriefs(Map<String, Object> chosenField) {
-        List<Debrief> debriefs = new ArrayList<>();
-
-        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
-            String fieldName = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value == null) {
-                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
-            }
-
-            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
-                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
-            }
-
-            Object searchValue = (value instanceof Collection) ? ((Collection<?>) value).iterator().next() : value;
-
-            try {
-                List<Debrief> foundDebriefs = findDebriefsByField(fieldName, searchValue);
-                debriefs.addAll(foundDebriefs);
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage());
-                throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
-            }
-        }
-
-        return debriefs;
-    }
-
-    /***
-     *
-     * @param fieldName the name of the field i am trying to filter
-     * @param value the value of that field
-     * @return the list of the users
-     */
-    private List<Debrief> findDebriefsByField(String fieldName, Object value) {
-        List<Debrief> debriefs = new ArrayList<>();
-
-        for (Method method : debriefRepository.getClass().getMethods()) {
-            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
-
-            try {
-                String methodName = buildMethodName(fieldName, value);
-                if (!method.getName().equals(methodName)) continue;
-
-                if (value instanceof Map) {
-                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
-                }
-                // Invoke the method dynamically
-                Object result = method.invoke(debriefRepository, value);
-
-                if (result instanceof Optional<?>) {
-                    ((Optional<?>) result).ifPresent(user -> debriefs.add((Debrief) user));
-                } else if (result instanceof List<?>) {
-                    debriefs.addAll((List<Debrief>) result);
-                } else {
-                    System.err.println("Unexpected return type: " + result.getClass().getName());
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("Error invoking method: " + method.getName(), e);
-            }
-        }
-        return debriefs;
+        return super.getEntities(chosenField);
     }
 
     public Boolean deleteDebriefById(String id) {
-        if(debriefRepository.existsById(id)) {
-            try{
+        if (debriefRepository.existsById(id)) {
+            try {
                 debriefRepository.deleteById(id);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
@@ -170,7 +109,7 @@ public class DebriefService {
     }
 
 
-    private Debrief setFields(Debrief debrief,DebriefInput input, List<String> skippFields) {
+    private Debrief setFields(Debrief debrief, DebriefInput input, List<String> skippFields) {
         Map<String, Function<Object, Object>> customProcessors = new HashMap<>();
         customProcessors.put("contentItems", rawValue -> {
             if (rawValue instanceof ContentInput contentInput) {
@@ -199,14 +138,14 @@ public class DebriefService {
                 }
                 return items;
             }
-                throw new IllegalArgumentException("Invalid value for contentItems field");
+            throw new IllegalArgumentException("Invalid value for contentItems field");
         });
 
         customProcessors.put("tasks", value -> {
-            if(!((List<TaskInput>)value).isEmpty()){
+            if (!((List<TaskInput>) value).isEmpty()) {
                 List<Task> tasks = new ArrayList<>();
-                for (TaskInput taskInput : ((List<TaskInput>)value)) {
-                    if(Objects.isNull(taskInput.id()) || taskInput.id().isBlank()){
+                for (TaskInput taskInput : ((List<TaskInput>) value)) {
+                    if (Objects.isNull(taskInput.id()) || taskInput.id().isBlank()) {
                         tasks.add(taskService.createTask(taskInput, debrief.getId(), null));
                     } else {
                         tasks.add(taskService.updateTask(taskInput));
@@ -217,11 +156,11 @@ public class DebriefService {
             throw new IllegalArgumentException("Invalid value for tasks field");
         });
 
-        customProcessors.put("lessons", value ->{
-            if(!((List<LessonInput>)value).isEmpty()){
+        customProcessors.put("lessons", value -> {
+            if (!((List<LessonInput>) value).isEmpty()) {
                 List<Lesson> lessons = new ArrayList<>();
-                for (LessonInput lessonInput : ((List<LessonInput>)value)) {
-                    if(Objects.isNull(lessonInput.id()) || lessonInput.id().isBlank()){
+                for (LessonInput lessonInput : ((List<LessonInput>) value)) {
+                    if (Objects.isNull(lessonInput.id()) || lessonInput.id().isBlank()) {
                         lessons.add(lessonService.createLesson(lessonInput, debrief.getId()));
                     } else {
                         lessons.add(lessonService.updateLesson(lessonInput));
@@ -232,7 +171,7 @@ public class DebriefService {
             throw new IllegalArgumentException("Invalid value for lessons field");
         });
 
-        return genericService.setFieldsGeneric(debrief, input, customProcessors, skippFields);
+        return super.setFields(debrief, input, customProcessors, skippFields);
     }
 
     /**

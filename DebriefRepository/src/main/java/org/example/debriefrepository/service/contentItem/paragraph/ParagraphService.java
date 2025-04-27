@@ -20,7 +20,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class ParagraphService {
+public class ParagraphService extends GenericService<Paragraph, ParagraphInput> {
 
     private final ParagraphRepository paragraphRepository;
 
@@ -29,9 +29,6 @@ public class ParagraphService {
     private final CommentService commentService;
 
     private final DebriefRepository debriefRepository;
-
-    @Autowired
-    private final GenericService<Paragraph, ParagraphInput> genericService;
 
     private final Logger logger = LoggerFactory.getLogger(ParagraphService.class);
 
@@ -42,9 +39,8 @@ public class ParagraphService {
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("comments");
-        paragraph = genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
-
-        try{
+        paragraph = super.setFields(paragraph, paragraphInput, null, skippedFields);
+        try {
             paragraph.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
             paragraphRepository.save(paragraph);
@@ -62,7 +58,7 @@ public class ParagraphService {
             }
             paragraph.setComments(savedComments);
 
-            try{
+            try {
                 paragraph = paragraphRepository.save(paragraph);
             } catch (Exception e) {
                 logger.error(e.getMessage());
@@ -79,7 +75,7 @@ public class ParagraphService {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
         skippedFields.add("comments");
-        paragraph = genericService.setFieldsGeneric(paragraph, paragraphInput, null, skippedFields);
+        paragraph = super.setFields(paragraph, paragraphInput, null, skippedFields);
         List<CommentInput> comments = paragraphInput.getComments();
 
         if (Objects.nonNull(comments) && !comments.isEmpty()) {
@@ -89,12 +85,12 @@ public class ParagraphService {
                         .orElse(null);
                 if (Objects.nonNull(existingComment)) {
                     updatedComments.add(commentService.updateComment(commentInput));
-                } else{
+                } else {
                     updatedComments.add(commentService.createComment(commentInput, paragraph.getId()));
                 }
             }
             paragraph.setComments(updatedComments);
-            try{
+            try {
                 paragraph = paragraphRepository.save(paragraph);
             } catch (Exception e) {
                 logger.error(e.getMessage());

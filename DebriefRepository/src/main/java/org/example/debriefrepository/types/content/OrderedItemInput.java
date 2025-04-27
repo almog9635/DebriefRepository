@@ -11,5 +11,4 @@ public class OrderedItemInput {
 
     private String id;
     private Long index;
-
 }

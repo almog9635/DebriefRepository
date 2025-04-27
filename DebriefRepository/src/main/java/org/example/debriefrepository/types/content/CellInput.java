@@ -13,5 +13,4 @@ public class CellInput {
     private String value;
     private String column;
     private String row;
-
 }

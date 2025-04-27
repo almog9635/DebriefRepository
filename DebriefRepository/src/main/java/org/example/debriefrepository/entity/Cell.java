@@ -8,11 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "cells", schema = "debrief_mgmt")
+@Table(name = "cells")
 public class Cell extends BaseEntity {
-
-    @Column(name = "value")
-    private String value;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "row_id", nullable = false)
@@ -22,4 +19,6 @@ public class Cell extends BaseEntity {
     @JoinColumn(name = "column_id", nullable = false)
     private TableColumn column;
 
+    @Column(name = "value")
+    private String value;
 }

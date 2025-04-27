@@ -1,29 +1,30 @@
 type Debrief{
     id: ID!
+    title: String!
+    labels: String!
     contentItems: [Content!]!
+    metaData: Metadata!
     date: ZonedDateTime!
-    user: User!
-    group: Group!
     lessons: [Lesson!]
     tasks: [Task!]!
 }
 
 input DebriefInput{
     id : ID
+    title: String
+    labels: String
     contentItems: ContentInput
     date: ZonedDateTime
-    user: ID
-    group: GroupInput
     lesson: LessonInput
     tasks: TaskInput
 }
 
 input DebriefUpdate{
     id: ID
+    title: String
+    labels: String
     contentItems: ContentInput
     date: ZonedDateTime
-    user: ID
-    group: String
     lessons: [LessonInput!]
     tasks: [TaskInput!]
 }

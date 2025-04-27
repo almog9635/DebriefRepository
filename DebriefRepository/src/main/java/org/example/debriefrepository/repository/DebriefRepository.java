@@ -7,8 +7,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface DebriefRepository extends JpaRepository<Debrief, String> {
+
     List<Debrief> findByDate(ZonedDateTime date);
-    List<Debrief> findByGroupName(String name);
-    List<Debrief> findByGroup_Id(String id);
-    List<Debrief> findByUser_Id(String id);
 }

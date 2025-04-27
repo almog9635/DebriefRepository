@@ -1,8 +1,6 @@
 package org.example.debriefrepository.entity;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,10 +13,11 @@ import java.util.List;
 @DiscriminatorValue("TABLE")
 public class Table extends ContentItem {
 
-    @OneToMany(mappedBy = "table")
+    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<TableColumn> columns = new ArrayList<>();
 
-    @OneToMany(mappedBy = "table")
+    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Row> rows = new ArrayList<>();
-
 }

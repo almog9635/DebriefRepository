@@ -7,10 +7,10 @@ import java.util.List;
 
 public record DebriefInput(
         String id,
+        String title,
+        String labels,
         ContentInput contentItems,
         ZonedDateTime date,
-        String user,
-        String group,
         List<LessonInput> lessons,
         List<TaskInput> tasks) {
 }

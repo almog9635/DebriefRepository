@@ -1,7 +1,6 @@
 package org.example.debriefrepository.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @DiscriminatorValue("PARAGRAPH")
 public class Paragraph extends ContentItem {
 
-    @OneToMany(mappedBy = "paragraph")
+    @OneToMany(mappedBy = "paragraph", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
-
 }

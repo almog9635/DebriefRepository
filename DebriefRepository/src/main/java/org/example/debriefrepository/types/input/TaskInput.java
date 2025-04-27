@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 public record TaskInput(
         String id,
         String content,
+        boolean completed,
         ZonedDateTime startDate,
         ZonedDateTime deadline,
         String debrief,
