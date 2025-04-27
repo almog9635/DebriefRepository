@@ -1,5 +1,6 @@
 package org.example.debriefrepository.controller;
 
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext.WithUserContext;
 import org.example.debriefrepository.entity.Role;
@@ -35,13 +36,13 @@ public class RoleController {
 
     @WithUserContext
     @MutationMapping
-    public Role createRole(@Argument(Const.INPUT) RoleInput roleInput, @ContextValue String userId) {
+    public Role createRole(@Argument(Const.INPUT) RoleInput roleInput, DataFetchingEnvironment environment) {
         return roleService.createRole(roleInput);
     }
 
     @WithUserContext
     @MutationMapping
-    public Role updateRole(@Argument(Const.INPUT) RoleInput roleInput, @ContextValue String userId) {
+    public Role updateRole(@Argument(Const.INPUT) RoleInput roleInput, DataFetchingEnvironment environment) {
         return roleService.update(roleInput);
     }
 

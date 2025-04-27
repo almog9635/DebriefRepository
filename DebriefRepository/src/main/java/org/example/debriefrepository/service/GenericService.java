@@ -3,12 +3,14 @@ package org.example.debriefrepository.service;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.debriefrepository.entity.BaseEntity;
 import org.example.debriefrepository.entity.Role;
 import org.example.debriefrepository.entity.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -19,103 +21,108 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class GenericService<T extends BaseEntity, U> {
+@NoArgsConstructor
+public abstract class GenericService<T extends BaseEntity, U> {
 
-    private final List<JpaRepository<? extends BaseEntity, String>> jpaRepositoryList;
+    @Setter(onMethod = @__({@Autowired}))
+    private List<JpaRepository<? extends BaseEntity, String>> jpaRepositoryList;
+
+    private final Class<T> domainClass = (Class<T>)
+            ((ParameterizedType)getClass().getGenericSuperclass())
+                    .getActualTypeArguments()[0];
 
     private final Logger logger = LoggerFactory.getLogger(GenericService.class);
 
-//    public List<T> getEntities(Map<String, Object> chosenField) {
-//        List<T> entities = new ArrayList<>();
-//
-//        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
-//            String fieldName = entry.getKey();
-//            Object value = entry.getValue();
-//
-//            if (value == null) {
-//                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
-//            }
-//
-//            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
-//                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
-//            }
-//
-//            Object searchValue = (value instanceof Collection) ? ((Collection<?>) value).iterator().next() : value;
-//
-//            try {
-//                List<T> foundEntities = findEntitiesByField(fieldName, searchValue);
-//                entities.addAll(foundEntities);
-//            } catch (IllegalArgumentException e) {
-//                logger.error(e.getMessage());
-//                throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
-//            }
-//        }
-//
-//        return entities;
-//    }
-//
-//    /***
-//     *
-//     * @param fieldName the name of the field i am trying to filter
-//     * @param value the value of that field
-//     * @return the list of the users
-//     */
-//    private List<T> findEntitiesByField(String fieldName, Object value) {
-//        List<T> entities = new ArrayList<>();
-//
-//        JpaRepository<? extends BaseEntity, String> repository = getRepositoryFor(T.class);
-//
-//        for (Method method : debriefRepository.getClass().getMethods()) {
-//            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
-//
-//            try {
-//                String methodName = buildMethodName(fieldName, value);
-//                if (!method.getName().equals(methodName)) continue;
-//
-//                if (value instanceof Map) {
-//                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
-//                }
-//
-//                Object result = method.invoke(debriefRepository, value);
-//
-//                if (result instanceof Optional<?>) {
-//                    ((Optional<?>) result).ifPresent(entity -> entities.add((T) entity));
-//                } else if (result instanceof List<?>) {
-//                    entities.addAll((List<T>) result);
-//                } else {
-//                    System.err.println("Unexpected return type: " + result.getClass().getName());
-//                }
-//            } catch (IllegalAccessException | InvocationTargetException e) {
-//                throw new RuntimeException("Error invoking method: " + method.getName(), e);
-//            }
-//        }
-//        return entities;
-//    }
-//
-//    /**
-//     * Converts nested field names into Spring Data JPA method format.
-//     * Example:
-//     * - "firstName" -> "findByFirstName"
-//     * - "group.id" -> "findByGroupId"
-//     */
-//    private String buildMethodName(String fieldName, Object value) {
-//        StringBuilder methodName = new StringBuilder("findBy");
-//
-//        String[] parts = fieldName.split("\\.");
-//        for (String part : parts) {
-//            methodName.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
-//        }
-//
-//        if (value instanceof Map<?, ?> mapValue) {
-//            if (!mapValue.isEmpty()) {
-//                String nestedKey = mapValue.keySet().iterator().next().toString();
-//                methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
-//            }
-//        }
-//
-//        return methodName.toString();
-//    }
+    public List<T> getEntities(Map<String, Object> chosenField) {
+        List<T> entities = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
+            String fieldName = entry.getKey();
+            Object value = entry.getValue();
+
+            if (Objects.isNull(value)) {
+                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
+            }
+
+            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
+            }
+
+            Object searchValue = (value instanceof Collection) ? ((Collection<?>) value).iterator().next() : value;
+
+            try {
+                List<T> foundEntities = findEntitiesByField(fieldName, searchValue);
+                entities.addAll(foundEntities);
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
+                throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
+            }
+        }
+
+        return entities;
+    }
+
+    /***
+     *
+     * @param fieldName the name of the field i am trying to filter
+     * @param value the value of that field
+     * @return the list of the users
+     */
+    private List<T> findEntitiesByField(String fieldName, Object value) {
+        List<T> entities = new ArrayList<>();
+
+        JpaRepository<? extends BaseEntity, String> repository = getRepositoryFor(domainClass);
+
+        for (Method method : repository.getClass().getMethods()) {
+            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
+
+            try {
+                String methodName = buildMethodName(fieldName, value);
+                if (!method.getName().equals(methodName)) continue;
+
+                if (value instanceof Map) {
+                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
+                }
+
+                Object result = method.invoke(repository, value);
+
+                if (result instanceof Optional<?>) {
+                    ((Optional<?>) result).ifPresent(entity -> entities.add((T) entity));
+                } else if (result instanceof List<?>) {
+                    entities.addAll((List<T>) result);
+                } else {
+                    System.err.println("Unexpected return type: " + result.getClass().getName());
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Error invoking method: " + method.getName(), e);
+            }
+        }
+        return entities;
+    }
+
+    /**
+     * Converts nested field names into Spring Data JPA method format.
+     * Example:
+     * - "firstName" -> "findByFirstName"
+     * - "group.id" -> "findByGroupId"
+     */
+    private String buildMethodName(String fieldName, Object value) {
+        StringBuilder methodName = new StringBuilder("findBy");
+
+        String[] parts = fieldName.split("\\.");
+        for (String part : parts) {
+            methodName.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+
+        if (value instanceof Map<?, ?> mapValue) {
+            if (!mapValue.isEmpty()) {
+                String nestedKey = mapValue.keySet().iterator().next().toString();
+                methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
+            }
+        }
+
+        return methodName.toString();
+    }
 
 
     public T setFields(T entity, U input, Map<String, Function<Object, Object>> customProcessors,
@@ -173,6 +180,7 @@ public class GenericService<T extends BaseEntity, U> {
 
     private Object fetchEntities(Field field, Object value) {
         Class<?> type = findListType(field);
+
         if (type == UserRole.class) {
             type = Role.class;
         }

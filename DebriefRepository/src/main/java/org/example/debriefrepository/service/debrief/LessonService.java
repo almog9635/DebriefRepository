@@ -19,16 +19,13 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class LessonService {
+public class LessonService extends GenericService<Lesson, LessonInput> {
 
     private final LessonRepository lessonRepository;
 
     private final DebriefRepository debriefRepository;
 
     private final TaskService taskService;
-
-    @Autowired
-    private GenericService<Lesson, LessonInput> genericService;
 
     private final Logger logger = LoggerFactory.getLogger(LessonService.class);
 
@@ -38,7 +35,7 @@ public class LessonService {
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("tasks");
-        genericService.setFields(lesson, input, null, skippedFields);
+        super.setFields(lesson, input, null, skippedFields);
         try {
             lesson.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("debrief not found")));
@@ -72,7 +69,7 @@ public class LessonService {
         try {
             existingLesson = lessonRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("debrief not found"));
-            genericService.setFields(existingLesson, input, null, skippedFields);
+            super.setFields(existingLesson, input, null, skippedFields);
 
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage());

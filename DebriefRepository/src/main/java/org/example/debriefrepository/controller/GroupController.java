@@ -1,5 +1,6 @@
 package org.example.debriefrepository.controller;
 
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext.WithUserContext;
 import org.example.debriefrepository.entity.Group;
@@ -35,13 +36,13 @@ public class GroupController {
 
     @WithUserContext
     @MutationMapping
-    public Group createGroup(@Argument(Const.INPUT) GroupInput input, @ContextValue String userId) {
+    public Group createGroup(@Argument(Const.INPUT) GroupInput input, DataFetchingEnvironment environment) {
         return groupService.create(input);
     }
 
     @WithUserContext
     @MutationMapping
-    public Group updateGroup(@Argument(Const.INPUT) GroupInput input, @ContextValue String userId) {
+    public Group updateGroup(@Argument(Const.INPUT) GroupInput input, DataFetchingEnvironment environment) {
         return groupService.update(input);
     }
 

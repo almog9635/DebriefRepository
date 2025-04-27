@@ -16,14 +16,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TableColumnService {
+public class TableColumnService extends GenericService<TableColumn, ColumnInput> {
 
     private final TableColumnRepository tableColumnRepository;
 
     private final TableRepository tableRepository;
-
-    @Autowired
-    private final GenericService<TableColumn, ColumnInput> genericService;
 
     private final Logger logger = LoggerFactory.getLogger(TableColumnService.class);
 
@@ -31,7 +28,7 @@ public class TableColumnService {
         TableColumn col = new TableColumn();
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("table");
-        genericService.setFields(col, input, null, skippedFields);
+        super.setFields(col, input, null, skippedFields);
         try {
             col.setTable(tableRepository.findById(tableId)
                     .orElseThrow(() -> new IllegalArgumentException("Could not find table with id: " + tableId)));
@@ -48,7 +45,7 @@ public class TableColumnService {
                 .orElseThrow(() -> new IllegalArgumentException("Could not find table with id: " + id));
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        genericService.setFields(existingCol, input, null, skippedFields);
+        super.setFields(existingCol, input, null, skippedFields);
         try {
             return tableColumnRepository.save(existingCol);
         } catch (Exception e) {

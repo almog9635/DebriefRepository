@@ -16,14 +16,11 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class GroupService {
+public class GroupService extends GenericService<Group, GroupInput> {
 
     @Autowired
     private final GroupRepository groupRepository;
-
-    @Autowired
-    private final GenericService<Group, GroupInput> genericService;
-
+    
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public List<Group> findAll() {
@@ -35,65 +32,7 @@ public class GroupService {
      * Iterates over the provided map, dynamically builds a repository method name and invokes it.
      */
     public Group getGroup(Map<String, Object> chosenField) {
-        Group group = null;
-        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
-            String fieldName = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value == null) {
-                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
-            }
-            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
-                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
-            }
-            Object searchValue = (value instanceof Collection)
-                    ? ((Collection<?>) value).iterator().next()
-                    : value;
-            try {
-                group = findGroupsByField(fieldName, searchValue);
-                if (group == null) {
-                    throw new IllegalArgumentException("The field '" + fieldName + "' is not found.");
-                }
-            } catch (IllegalArgumentException e) {
-                logger.error("Error finding groups by field '{}' with value '{}': {}",
-                        fieldName, searchValue, e.getMessage(), e);
-                throw new RuntimeException("Failed to find groups by field '" + fieldName + "'", e);
-            }
-        }
-        return group;
-    }
-
-    /**
-     * Dynamically invokes repository methods (e.g., findByName) to find a group.
-     */
-    private Group findGroupsByField(String fieldName, Object value) {
-        List<Group> groups = new ArrayList<>();
-        for (Method method : groupRepository.getClass().getMethods()) {
-            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
-            try {
-                String methodName = buildMethodName(fieldName, value);
-                if (!method.getName().equals(methodName)) continue;
-
-                // In case the value is nested in a Map
-                if (value instanceof Map) {
-                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
-                }
-                Object result = method.invoke(groupRepository, value);
-                if (result instanceof Optional<?>) {
-                    ((Optional<?>) result).ifPresent(g -> groups.add((Group) g));
-                } else if (result instanceof List<?>) {
-                    groups.addAll((List<Group>) result);
-                } else if (result instanceof Group) {
-                    groups.add((Group) result);
-                } else {
-                    logger.error("Unexpected return type: " + result.getClass().getName());
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("Error invoking method: " + method.getName(), e);
-                throw new RuntimeException("Error invoking method: " + method.getName(), e);
-            }
-        }
-        return groups.stream().findFirst().orElse(null);
+        return super.getEntities(chosenField).getFirst();
     }
 
     public Group update(GroupInput input) {
@@ -115,24 +54,7 @@ public class GroupService {
     private Group setFields(Group group, GroupInput input) {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
-        return genericService.setFields(group, input, null, skippedFields);
-    }
-
-    /**
-     * Builds a repository method name from a field name.
-     */
-    private String buildMethodName(String fieldName, Object value) {
-        StringBuilder methodName = new StringBuilder("findBy");
-        String[] parts = fieldName.split("\\.");
-        for (String part : parts) {
-            methodName.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
-        }
-        if (value instanceof Map<?, ?> mapValue && !mapValue.isEmpty()) {
-            String nestedKey = mapValue.keySet().iterator().next().toString();
-            methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
-        }
-
-        return methodName.toString();
+        return super.setFields(group, input, null, skippedFields);
     }
 
     @Transactional

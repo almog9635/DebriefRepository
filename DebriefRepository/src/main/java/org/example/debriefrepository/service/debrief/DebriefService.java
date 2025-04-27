@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class DebriefService {
+public class DebriefService extends GenericService<Debrief, DebriefInput> {
 
     @Autowired
     private final DebriefRepository debriefRepository;
@@ -43,9 +43,6 @@ public class DebriefService {
 
     @Autowired
     private final TaskService taskService;
-
-    @Autowired
-    private GenericService<Debrief, DebriefInput> genericService;
 
     private static final Logger logger = LoggerFactory.getLogger(DebriefService.class);
 
@@ -76,68 +73,7 @@ public class DebriefService {
     }
 
     public List<Debrief> getDebriefs(Map<String, Object> chosenField) {
-        List<Debrief> debriefs = new ArrayList<>();
-
-        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
-            String fieldName = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value == null) {
-                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
-            }
-
-            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
-                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
-            }
-
-            Object searchValue = (value instanceof Collection) ? ((Collection<?>) value).iterator().next() : value;
-
-            try {
-                List<Debrief> foundDebriefs = findDebriefsByField(fieldName, searchValue);
-                debriefs.addAll(foundDebriefs);
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage());
-                throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
-            }
-        }
-
-        return debriefs;
-    }
-
-    /***
-     *
-     * @param fieldName the name of the field i am trying to filter
-     * @param value the value of that field
-     * @return the list of the users
-     */
-    private List<Debrief> findDebriefsByField(String fieldName, Object value) {
-        List<Debrief> debriefs = new ArrayList<>();
-
-        for (Method method : debriefRepository.getClass().getMethods()) {
-            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
-
-            try {
-                String methodName = buildMethodName(fieldName, value);
-                if (!method.getName().equals(methodName)) continue;
-
-                if (value instanceof Map) {
-                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
-                }
-                // Invoke the method dynamically
-                Object result = method.invoke(debriefRepository, value);
-
-                if (result instanceof Optional<?>) {
-                    ((Optional<?>) result).ifPresent(user -> debriefs.add((Debrief) user));
-                } else if (result instanceof List<?>) {
-                    debriefs.addAll((List<Debrief>) result);
-                } else {
-                    System.err.println("Unexpected return type: " + result.getClass().getName());
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("Error invoking method: " + method.getName(), e);
-            }
-        }
-        return debriefs;
+        return super.getEntities(chosenField);
     }
 
     public Boolean deleteDebriefById(String id) {
@@ -235,7 +171,7 @@ public class DebriefService {
             throw new IllegalArgumentException("Invalid value for lessons field");
         });
 
-        return genericService.setFields(debrief, input, customProcessors, skippFields);
+        return super.setFields(debrief, input, customProcessors, skippFields);
     }
 
     /**

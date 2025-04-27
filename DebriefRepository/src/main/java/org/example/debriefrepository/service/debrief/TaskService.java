@@ -18,16 +18,13 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class TaskService {
+public class TaskService extends GenericService<Task, TaskInput> {
 
     private final LessonRepository lessonRepository;
 
     private final DebriefRepository debriefRepository;
 
     private final TaskRepository taskRepository;
-
-    @Autowired
-    private final GenericService<Task, TaskInput> genericService;
 
     private final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
@@ -37,7 +34,7 @@ public class TaskService {
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("lesson");
-        genericService.setFields(task, taskInput, null, skippedFields);
+        super.setFields(task, taskInput, null, skippedFields);
         try {
             if (Objects.nonNull(lessonId)) {
                 task.setLesson(lessonRepository.findById(lessonId)
@@ -57,7 +54,7 @@ public class TaskService {
         try {
             Task existingTask = taskRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("task not found"));
-            genericService.setFields(existingTask, taskInput, null, null);
+            super.setFields(existingTask, taskInput, null, null);
             return taskRepository.save(existingTask);
         } catch (Exception e) {
             logger.error(e.getMessage());

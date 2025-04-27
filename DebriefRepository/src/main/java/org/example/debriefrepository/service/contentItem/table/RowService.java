@@ -18,14 +18,11 @@ import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class RowService {
+public class RowService extends GenericService<Row, RowInput> {
 
     private final RowRepository rowRepository;
 
     private final TableRepository tableRepository;
-
-    @Autowired
-    private final GenericService<Row, RowInput> genericService;
 
     @Autowired
     private final CellService cellService;
@@ -37,7 +34,7 @@ public class RowService {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("table");
         skippedFields.add("cells");
-        genericService.setFields(row, input, null, skippedFields);
+        super.setFields(row, input, null, skippedFields);
         try {
             row.setTable(tableRepository.findById(tableId)
                     .orElseThrow(() -> new IllegalArgumentException("row not found")));
@@ -83,7 +80,7 @@ public class RowService {
             throw new IllegalArgumentException("Invalid value for cells field");
         });
 
-        return genericService.setFields(row, input, customProcessors, skippedFields);
+        return super.setFields(row, input, customProcessors, skippedFields);
     }
 
 }

@@ -1,5 +1,6 @@
 package org.example.debriefrepository.controller;
 
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.example.debriefrepository.config.UserContext.WithUserContext;
 import org.example.debriefrepository.entity.Debrief;
@@ -36,12 +37,12 @@ public class DebriefController {
 
     @WithUserContext
     @MutationMapping
-    public Debrief createDebrief(@Argument(Const.INPUT) DebriefInput input, @ContextValue String userId) {
+    public Debrief createDebrief(@Argument(Const.INPUT) DebriefInput input, DataFetchingEnvironment environment) {
         return debriefService.createDebrief(input);
     }
 
     @MutationMapping
-    public Debrief updateDebrief(@Argument(Const.INPUT) DebriefInput input, @ContextValue String userId) {
+    public Debrief updateDebrief(@Argument(Const.INPUT) DebriefInput input, DataFetchingEnvironment environment) {
         return debriefService.updateDebrief(input);
 
     }

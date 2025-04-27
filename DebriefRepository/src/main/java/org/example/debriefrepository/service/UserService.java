@@ -13,24 +13,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService extends GenericService<User, UserInput> {
 
     @Autowired
     private final UserRepository userRepository;
 
     @Autowired
     private final RoleRepository roleRepository;
-
-    @Autowired
-    private final GenericService<User, UserInput> genericService;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -52,74 +50,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    /***
-     *
-     * @param chosenField is the chosen field i want to filter the users by
-     * @return a list of users by the chosen field
-     */
-    public List<User> getUser(Map<String, Object> chosenField) {
-        List<User> users = new ArrayList<>();
-
-        for (Map.Entry<String, Object> entry : chosenField.entrySet()) {
-            String fieldName = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value == null) {
-                throw new IllegalArgumentException("The field '" + fieldName + "' is null.");
-            }
-
-            if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
-                throw new IllegalArgumentException("The collection for field '" + fieldName + "' is empty.");
-            }
-
-            Object searchValue = (value instanceof Collection) ? ((Collection<?>) value).iterator().next() : value;
-
-            try {
-                List<User> foundUsers = findUsersByField(fieldName, searchValue);
-                users.addAll(foundUsers);
-            } catch (IllegalArgumentException e) {
-                logger.error(e.getMessage());
-                throw new RuntimeException("Failed to find users by field '" + fieldName + "'", e);
-            }
-        }
-
-        return users;
-    }
-
-    /***
-     *
-     * @param fieldName the name of the field i am trying to filter
-     * @param value the value of that field
-     * @return the list of the users
-     */
-    private List<User> findUsersByField(String fieldName, Object value) {
-        List<User> users = new ArrayList<>();
-
-        for (Method method : userRepository.getClass().getMethods()) {
-            if (!method.getName().startsWith("findBy") || method.getParameterCount() != 1) continue;
-
-            try {
-                String methodName = buildMethodName(fieldName, value);
-                if (!method.getName().equals(methodName)) continue;
-
-                if (value instanceof Map) {
-                    value = ((Map<?, ?>) value).entrySet().iterator().next().getValue();
-                }
-
-                Object result = method.invoke(userRepository, value);
-
-                if (result instanceof Optional<?>) {
-                    ((Optional<?>) result).ifPresent(user -> users.add((User) user));
-                } else if (result instanceof List<?>) {
-                    users.addAll((List<User>) result);
-                } else {
-                    System.err.println("Unexpected return type: " + result.getClass().getName());
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("Error invoking method: " + method.getName(), e);
-            }
-        }
-        return users;
+    public List<User> getUser(Map<String, Object> input){
+        return super.getEntities(input);
     }
 
     @Transactional
@@ -180,31 +112,7 @@ public class UserService {
                 throw new RuntimeException(e.getMessage());
             }
         });
-        return genericService.setFields(user, input, customProcessors, skippedFields);
-    }
-
-    /**
-     * Converts nested field names into Spring Data JPA method format.
-     * Example:
-     * - "firstName" -> "findByFirstName"
-     * - "group.id" -> "findByGroupId"
-     */
-    private String buildMethodName(String fieldName, Object value) {
-        StringBuilder methodName = new StringBuilder("findBy");
-
-        String[] parts = fieldName.split("\\.");
-        for (String part : parts) {
-            methodName.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
-        }
-
-        if (value instanceof Map<?, ?> mapValue) {
-            if (!mapValue.isEmpty()) {
-                String nestedKey = mapValue.keySet().iterator().next().toString();
-                methodName.append(Character.toUpperCase(nestedKey.charAt(0))).append(nestedKey.substring(1));
-            }
-        }
-
-        return methodName.toString();
+        return super.setFields(user, input, customProcessors, skippedFields);
     }
 
 }

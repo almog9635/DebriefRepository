@@ -20,7 +20,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class ParagraphService {
+public class ParagraphService extends GenericService<Paragraph, ParagraphInput> {
 
     private final ParagraphRepository paragraphRepository;
 
@@ -29,9 +29,6 @@ public class ParagraphService {
     private final CommentService commentService;
 
     private final DebriefRepository debriefRepository;
-
-    @Autowired
-    private final GenericService<Paragraph, ParagraphInput> genericService;
 
     private final Logger logger = LoggerFactory.getLogger(ParagraphService.class);
 
@@ -42,7 +39,7 @@ public class ParagraphService {
         skippedFields.add("id");
         skippedFields.add("debrief");
         skippedFields.add("comments");
-        paragraph = genericService.setFields(paragraph, paragraphInput, null, skippedFields);
+        paragraph = super.setFields(paragraph, paragraphInput, null, skippedFields);
         try {
             paragraph.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
@@ -78,7 +75,7 @@ public class ParagraphService {
         List<String> skippedFields = new ArrayList<>();
         skippedFields.add("id");
         skippedFields.add("comments");
-        paragraph = genericService.setFields(paragraph, paragraphInput, null, skippedFields);
+        paragraph = super.setFields(paragraph, paragraphInput, null, skippedFields);
         List<CommentInput> comments = paragraphInput.getComments();
 
         if (Objects.nonNull(comments) && !comments.isEmpty()) {

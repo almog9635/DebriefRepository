@@ -23,7 +23,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class TableService {
+public class TableService extends GenericService<Table, TableInput> {
 
     @Autowired
     private final TableRepository tableRepository;
@@ -41,9 +41,6 @@ public class TableService {
 
     private final RowRepository rowRepository;
 
-    @Autowired
-    private final GenericService<Table, TableInput> genericService;
-
     private final Logger logger = LoggerFactory.getLogger(TableService.class);
 
     public Table createTable(TableInput input, String debriefId) {
@@ -53,7 +50,7 @@ public class TableService {
         skippedFields.add("debrief");
         skippedFields.add("columns");
         skippedFields.add("rows");
-        table = genericService.setFields(table, input, null, skippedFields);
+        table = super.setFields(table, input, null, skippedFields);
         try {
             table.setDebrief(debriefRepository.findById(debriefId)
                     .orElseThrow(() -> new IllegalArgumentException("Debrief not found")));
@@ -97,7 +94,7 @@ public class TableService {
         skippedFields.add("id");
         skippedFields.add("columns");
         skippedFields.add("rows");
-        existingTable = genericService.setFields(existingTable, input, null, skippedFields);
+        existingTable = super.setFields(existingTable, input, null, skippedFields);
         List<ColumnInput> cols = input.getColumns();
         List<RowInput> rows = input.getRows();
         if (Objects.nonNull(cols) && !cols.isEmpty() &&
