@@ -60,6 +60,5 @@ public class TaskService extends GenericService<Task, TaskInput> {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
-
     }
 }

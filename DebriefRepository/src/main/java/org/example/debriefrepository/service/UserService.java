@@ -106,7 +106,8 @@ public class UserService extends GenericService<User, UserInput> {
                             return userRole;
                         })
                         .collect(Collectors.toCollection(ArrayList::new));
-                return user.getRoles().addAll(newRoles);
+                user.getRoles().addAll(newRoles);
+                return user.getRoles();
             } catch (IllegalArgumentException e) {
                 logger.error(e.getMessage());
                 throw new RuntimeException(e.getMessage());

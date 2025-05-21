@@ -4,7 +4,7 @@ type Role{
 }
 
 input RoleInput{
-    id: ID!
+    id: ID
     name: String
 }
 

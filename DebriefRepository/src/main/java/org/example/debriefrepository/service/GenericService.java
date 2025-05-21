@@ -144,11 +144,7 @@ public abstract class GenericService<T extends BaseEntity, U> {
                 if (!processed && Objects.nonNull(customProcessors) && customProcessors.containsKey(fieldName)
                         && Objects.nonNull(value)) {
                     Object processedValue = customProcessors.get(fieldName).apply(value);
-
-                    if(!entityField.getName().equals("roles")) {
-                        entityField.set(entity, processedValue);
-                    }
-
+                    entityField.set(entity, processedValue);
                     processed = true;
                 }
 

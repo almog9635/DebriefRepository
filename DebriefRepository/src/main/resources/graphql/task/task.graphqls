@@ -1,4 +1,4 @@
-type Task{
+type Task {
     id: ID!
     content: String!
     startDate: ZonedDateTime!
@@ -9,7 +9,7 @@ type Task{
     lesson: Lesson
 }
 
-input TaskInput{
+input TaskInput {
     id: ID
     content: String
     startDate: ZonedDateTime

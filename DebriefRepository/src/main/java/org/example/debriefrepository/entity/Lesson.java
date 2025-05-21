@@ -14,12 +14,15 @@ import java.util.List;
 @Table(name = "lesson", schema = "debrief_mgmt")
 public class Lesson extends BaseEntity {
 
-    @Column(name = "content", nullable = false)
-    private String content;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "debrief_id", nullable = false)
     private Debrief debrief;
+
+    @Column(name = "content", nullable = false)
+    private String content;
+
+    @Column(name = "cluster", nullable = false)
+    private String cluster;
 
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL
             ,fetch = FetchType.LAZY)

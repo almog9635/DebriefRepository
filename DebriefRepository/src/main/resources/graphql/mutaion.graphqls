@@ -14,4 +14,6 @@ type Mutation {
     createRole(input: RoleUpdate!): Role!
     updateRole(input: RoleUpdate!): Role!
     deleteRole(id: ID!): Boolean
+
+    updateTask(input: TaskInput!): Task!
 }

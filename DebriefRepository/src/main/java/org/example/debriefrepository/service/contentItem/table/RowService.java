@@ -74,7 +74,9 @@ public class RowService extends GenericService<Row, RowInput> {
                         cells.add(cellService.updateCell(cellInput));
                     }
                 }
-                return cells;
+                row.getCells().clear();
+                row.getCells().addAll(cells);
+                return row.getCells();
             }
 
             throw new IllegalArgumentException("Invalid value for cells field");

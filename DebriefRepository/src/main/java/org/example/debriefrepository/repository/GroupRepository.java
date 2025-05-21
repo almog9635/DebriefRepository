@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface GroupRepository extends JpaRepository<Group, String> {
 
     Group findByName(String name);
+    Group findByCommanderId(String commander);
 }

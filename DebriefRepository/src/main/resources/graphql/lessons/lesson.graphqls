@@ -3,6 +3,7 @@ type Lesson{
     content: String!
     debrief: Debrief!
     tasks: [Task!]!
+    cluster: String!
 }
 
 input LessonInput{
@@ -10,10 +11,12 @@ input LessonInput{
     content: String
     debrief: DebriefInput
     tasks: [TaskInput!]
+    cluster: String
 }
 
 input LessonUpdate{
     content: String!
     debrief : ID!
+    cluster: String!
     tasks: [ID!]!
 }

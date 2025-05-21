@@ -41,6 +41,8 @@ public class DebriefController {
         return debriefService.createDebrief(input);
     }
 
+
+    @WithUserContext
     @MutationMapping
     public Debrief updateDebrief(@Argument(Const.INPUT) DebriefInput input, DataFetchingEnvironment environment) {
         return debriefService.updateDebrief(input);

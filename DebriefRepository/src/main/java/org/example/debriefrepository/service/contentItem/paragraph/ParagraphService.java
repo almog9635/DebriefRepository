@@ -89,7 +89,9 @@ public class ParagraphService extends GenericService<Paragraph, ParagraphInput> 
                     updatedComments.add(commentService.createComment(commentInput, paragraph.getId()));
                 }
             }
-            paragraph.setComments(updatedComments);
+
+            paragraph.getComments().clear();
+            paragraph.getComments().addAll(updatedComments);
             try {
                 paragraph = paragraphRepository.save(paragraph);
             } catch (Exception e) {

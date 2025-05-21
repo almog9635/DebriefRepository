@@ -115,7 +115,6 @@ public class DebriefService extends GenericService<Debrief, DebriefInput> {
             if (rawValue instanceof ContentInput contentInput) {
                 List<ContentItem> items = new ArrayList<>();
 
-                // Process Paragraphs
                 if (Objects.nonNull(contentInput.getParagraphs())) {
                     for (ParagraphInput pInput : contentInput.getParagraphs()) {
                         if (Objects.isNull(pInput.getId()) || pInput.getId().isBlank()) {
@@ -126,7 +125,6 @@ public class DebriefService extends GenericService<Debrief, DebriefInput> {
                     }
                 }
 
-                // Process Tables similarly, if applicable
                 if (Objects.nonNull(contentInput.getTables())) {
                     for (TableInput tInput : contentInput.getTables()) {
                         if (Objects.isNull(tInput.getId()) || tInput.getId().isBlank()) {
@@ -136,7 +134,9 @@ public class DebriefService extends GenericService<Debrief, DebriefInput> {
                         }
                     }
                 }
-                return items;
+                debrief.getContentItems().clear();
+                debrief.getContentItems().addAll(items);
+                return debrief.getContentItems();
             }
             throw new IllegalArgumentException("Invalid value for contentItems field");
         });
@@ -151,7 +151,9 @@ public class DebriefService extends GenericService<Debrief, DebriefInput> {
                         tasks.add(taskService.updateTask(taskInput));
                     }
                 }
-                return tasks;
+                debrief.getTasks().clear();
+                debrief.getTasks().addAll(tasks);
+                return debrief.getTasks();
             }
             throw new IllegalArgumentException("Invalid value for tasks field");
         });
@@ -166,7 +168,9 @@ public class DebriefService extends GenericService<Debrief, DebriefInput> {
                         lessons.add(lessonService.updateLesson(lessonInput));
                     }
                 }
-                return lessons;
+                debrief.getLessons().clear();
+                debrief.getLessons().addAll(lessons);
+                return debrief.getLessons();
             }
             throw new IllegalArgumentException("Invalid value for lessons field");
         });

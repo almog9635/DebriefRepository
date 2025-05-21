@@ -6,5 +6,6 @@ public record LessonInput(
         String id,
         String content,
         String debrief,
-        List<TaskInput> tasks) {
+        List<TaskInput> tasks,
+        String cluster) {
 }
